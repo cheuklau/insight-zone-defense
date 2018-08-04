@@ -56,7 +56,7 @@ The processed data along with additional metrics from Spark are loaded into a Po
 
 The DevOps pipeline will provision infrastructure as code (IaC) using Terraform and Packer and version control both the DE application and IaC using Git. The following figure illustrates the DevOps pipeline used for AirAware:
 
-![Fig 2: DevOps pipeline for AirAware](/images/AirAware_DevOps_Flow.png =50x)
+![Fig 2: DevOps pipeline for AirAware](/images/AirAware_DevOps_Flow.png)
 
 The proposed DevOps pipeline is an example of an immutable infrastructure where once an instance is launched, it is never changed, only replaced. The benefits of an immutable infrastructure include more consistency and reliability in addition to a simpler, more predictable deployment process. It also eliminates issues with mutable infrastructures such as configuration drift which requires the implementation of a configuration management tool (e.g., Chef, Puppet).
 
