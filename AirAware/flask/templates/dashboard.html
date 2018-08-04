@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AirAware</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+
+  <!-- Demo Dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js" type="text/javascript"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/holder/2.3.2/holder.min.js" type="text/javascript"></script>
+  <script>
+    Holder.add_theme("white", { background:"#fff", foreground:"#a7a7a7", size:10 });
+  </script>
+
+  <!-- keen-analysis@1.2.2 -->
+  <script src="https://d26b395fwzu5fz.cloudfront.net/keen-analysis-1.2.2.js" type="text/javascript"></script>
+
+  <!-- keen-dataviz@1.1.3 -->
+  <link href="https://d26b395fwzu5fz.cloudfront.net/keen-dataviz-1.1.3.css" rel="stylesheet" />
+  <script src="https://d26b395fwzu5fz.cloudfront.net/keen-dataviz-1.1.3.js" type="text/javascript"></script>  
+
+  <!-- Dashboard -->
+  <link rel="stylesheet" type="text/css" href="../static/css/keen-dashboards.css" />
+  <style>
+    #map {
+     height: 400px;
+     width: 100%;
+    }
+    /* Styling dfn tag to highlight the word with the tooltip */
+    dfn {
+      cursor: help;
+      font-style: normal;
+      position: relative;
+    }
+    dfn::after {
+      content: attr(data-info);
+      display: inline;
+      position: absolute;
+      top: 22px; left: 0;
+      opacity: 0;
+      width: 310px;
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.5em;
+      padding: 0.5em 0.8em;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      pointer-events: none; /* This prevents the box from apearing when hovered. */
+      transition: opacity 250ms, top 250ms;
+    }
+    dfn::before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 12px; left: 20px;
+      opacity: 0;
+      width: 0; height: 0;
+      border: solid transparent 5px;
+      border-bottom-color: rgba(0,0,0,0.8);
+      transition: opacity 250ms, top 250ms;
+    }
+    dfn:hover {z-index: 2;} /* Keeps the info boxes on top of other elements */
+    dfn:hover::after,
+    dfn:hover::before {opacity: 1;}
+    dfn:hover::after {top: 30px;}
+    dfn:hover::before {top: 20px;}
+  </style>
+  <!-- Bootstrap core CSS -->
+  <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom styles for this template -->
+  <link href="../static/css/starter-template.css" rel="stylesheet">
+
+</head>
+<body class="keen-dashboard" style="padding-top: 80px;">
+
+  <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../">
+          <span class="glyphicon glyphicon-chevron-left"></span>
+        </a>
+        <a class="navbar-brand" href="https://github.com/agaiduk/AirAware">AirAware</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-left">
+          <li><a href="https://docs.google.com/presentation/d/1BWLKoafapgM5VxpgU_nHYCeJLk38wu1VACwECdN8RIo">Slides</a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Air Pollution<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="http://www.aafa.org/page/air-pollution-smog-asthma.aspx">Air pollution and asthma</a></li>
+              <li><a href="https://www.epa.gov/criteria-air-pollutants">EPA website</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Alex Gaiduk<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="../static/pdf/Resume_Gaiduk.pdf">Resume</a></li>
+              <li><a href="https://www.linkedin.com/in/agaiduk">LinkedIn</a></li>
+              <li><a href="https://github.com/agaiduk">Github</a></li>
+              <li><a href="https://scholar.google.com/citations?user=hkZPyt4AAAAJ&hl=en">Publications</a></li>
+            </ul>
+          </li>
+          <li><a href="mailto:a.gaiduk@gmail.com">Email</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+
+    <br>
+    <div class="row search">
+      <div class="col-sm-8 col-sm-offset-2">
+        <form role="form" action="/" method="post">
+                <div class="input-group">
+                  <input type="text" class="form-control input-sm" name="address" placeholder="Enter a U.S. address...">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default btn-sm" type="submit" value="Submit"><span class="glyphicon glyphicon-search"></span></button>
+                  </span>
+                </div>
+        </form>
+      </div>
+    </div>
+        {% if error_message != None %}
+            <br><center>{{ error_message }}</center>
+        {% endif %}
+ <br><br>
+
+    <div class="row">
+
+      <div class="col-sm-12">
+        <div class="chart-wrapper">
+          <div id="map"></div>
+          <script>
+            function initMap() {
+              var coords = {lat: {{ lat|safe }}, lng: {{ lon|safe }}};
+              var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: coords
+              });
+              var marker = new google.maps.Marker({
+                position: coords,
+                map: map
+              });
+
+              var contentString = '<div id="content">'+
+                  '<div id="siteNotice">'+
+                  '</div>'+
+                  '<h4 id="firstHeading" class="firstHeading">Current conditions</h4>'+
+                  '<div id="bodyContent">'+
+                  '<p><b>Ozone:</b> ' + {{ ozone_current|safe }} + ' ppb ({{ ozone_level|safe }})</p>' +
+                  '<p><b>PM2.5:</b> ' + {{ pm_current|safe }} + ' &mu;g/m<sup>3</sup> ({{ pm_level|safe }})</p>' +
+                  '</div>'+
+                  '</div>';
+
+              var infowindow = new google.maps.InfoWindow({
+                content: contentString
+              });
+
+              var marker = new google.maps.Marker({
+                position: coords,
+                map: map,
+                title: 'Pollution meter'
+              });
+              marker.addListener('click', function() {
+                infowindow.open(map, marker);
+              });
+
+
+            }
+          </script>
+          <script async defer src={{ API_url|safe }}>
+          </script>
+        </div>
+      </div>
+
+    </div>
+    <div class="row">
+
+      <div class="col-sm-6">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            <dfn data-info="Highly irritating gas known of causing asthma attacks">Ozone</dfn> air pollution
+          </div>
+          <div class="chart" id="ozone"></div>
+          <div class="chart-notes">
+            Average monthly concentration of ozone in atmosphere
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            <dfn data-info="Hard particles with size netween 2.5 and 10 &mu;m; one of the most harmful components of smog">PM2.5 particles</dfn> air pollution
+          </div>
+          <div class="chart" id="pm"></div>
+          <div class="chart-notes">
+            Average monthly concentration of hard particles (between 2.5 and 10 &mu;m) in atmosphere
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  <!-- todo: add the download button back in after base devops pipeline built
+  <div class="container-fluid">
+    <form role="form" action="/download" method="post">
+      <button class="btn btn-primary btn-lg" type="submit" value={{ grid_id|safe }} name="grid_id">Download data</button>
+    </form>
+  </div>
+  -->
+
+  <br>
+
+  </div>
+
+  <!-- Project Analytics -->
+  <script type="text/javascript" src="../static/js/keen-analytics.js"></script>
+  <script src="http://code.highcharts.com/highcharts.js"></script>
+  <script>
+      var chart_ozone = {{ chart_ozone|safe }}
+      var chart_pm = {{ chart_pm|safe }}
+      var series_ozone = {{ series_ozone|safe }}
+      var series_pm = {{ series_pm|safe }}
+      var title = {"text": ''}
+      var tooltip_ozone = { 'pointFormat': "{series.name}: <b>{point.y:.2f}</b> ppb"}
+      var tooltip_pm = { 'pointFormat': "{series.name}: <b>{point.y:.2f}</b> &mu;g/m<sup>3</sup>", 'useHTML': true}
+      var xAxis = {'type': 'datetime', "title": {'text': 'Date'}, 'min': Date.UTC(2010, 0, 0)}
+      var yAxis_ozone = {"title": {"text": 'Concentration, ppb'}}
+      var yAxis_pm = {"title": {"text": 'Concentration, &mu;g/m<sup>3</sup>', 'useHTML': true}}
+      var plotOptions = {'series': {'marker': {'enabled': true}}}
+
+      $(document).ready(function() {
+          $(ozone).highcharts({
+              chart: chart_ozone,
+              title: title,
+              xAxis: xAxis,
+              yAxis: yAxis_ozone,
+              series: series_ozone,
+              tooltip: tooltip_ozone,
+              plotOptions: plotOptions
+          });
+      });
+
+      $(document).ready(function() {
+          $(pm).highcharts({
+              chart: chart_pm,
+              title: title,
+              xAxis: xAxis,
+              yAxis: yAxis_pm,
+              series: series_pm,
+              tooltip: tooltip_pm,
+              plotOptions: plotOptions
+          });
+      });
+  </script>
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script>window.jQuery || document.write('<script src="../static/docs/assets/js/vendor/jquery.min.js"><\/script>')</script>
+  <script src="../static/js/bootstrap.min.js"></script>
+  <script src="../static/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+misc_notes.md
+devops/single/terraform/terraform.tfstate
+devops/single/terraform/terraform.tfstate.backup
+devops/single/terraform/mykeypair
+devops/single/terraform/mykeypair.pub
+.DS_Store
+devops/single/terraform/.terraform/
