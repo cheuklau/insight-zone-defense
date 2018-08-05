@@ -136,55 +136,6 @@
 
     <div class="row">
 
-      <div class="col-sm-12">
-        <div class="chart-wrapper">
-          <div id="map"></div>
-          <script>
-            function initMap() {
-              var coords = {lat: {{ lat|safe }}, lng: {{ lon|safe }}};
-              var map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 15,
-                center: coords
-              });
-              var marker = new google.maps.Marker({
-                position: coords,
-                map: map
-              });
-
-              var contentString = '<div id="content">'+
-                  '<div id="siteNotice">'+
-                  '</div>'+
-                  '<h4 id="firstHeading" class="firstHeading">Current conditions</h4>'+
-                  '<div id="bodyContent">'+
-                  '<p><b>Ozone:</b> ' + {{ ozone_current|safe }} + ' ppb ({{ ozone_level|safe }})</p>' +
-                  '<p><b>PM2.5:</b> ' + {{ pm_current|safe }} + ' &mu;g/m<sup>3</sup> ({{ pm_level|safe }})</p>' +
-                  '</div>'+
-                  '</div>';
-
-              var infowindow = new google.maps.InfoWindow({
-                content: contentString
-              });
-
-              var marker = new google.maps.Marker({
-                position: coords,
-                map: map,
-                title: 'Pollution meter'
-              });
-              marker.addListener('click', function() {
-                infowindow.open(map, marker);
-              });
-
-
-            }
-          </script>
-          <script async defer src={{ API_url|safe }}>
-          </script>
-        </div>
-      </div>
-
-    </div>
-    <div class="row">
-
       <div class="col-sm-6">
         <div class="chart-wrapper">
           <div class="chart-title">
@@ -210,14 +161,6 @@
       </div>
 
     </div>
-
-  <!-- todo: add the download button back in after base devops pipeline built
-  <div class="container-fluid">
-    <form role="form" action="/download" method="post">
-      <button class="btn btn-primary btn-lg" type="submit" value={{ grid_id|safe }} name="grid_id">Download data</button>
-    </form>
-  </div>
-  -->
 
   <br>
 

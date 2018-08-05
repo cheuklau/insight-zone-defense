@@ -20,7 +20,7 @@
   "provisioners": [{
     "type": "shell",
     "scripts": [  
-      "scripts/setup-and-configure-spark.sh"
+      "scripts/download-and-install-spark.sh"
     ]
   }]
 }

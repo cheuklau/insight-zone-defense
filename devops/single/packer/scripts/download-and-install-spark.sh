@@ -1,9 +1,5 @@
 #!/bin/bash
 
-######################################################################
-# Setting up the environment
-######################################################################
-
 # Update package manager
 sudo add-apt-repository ppa:openjdk-r/ppa -y
 sudo apt-get update
@@ -32,10 +28,6 @@ if ! grep "export JAVA_HOME" ~/.profile; then
   echo -e "\nexport JAVA_HOME=/usr" | cat >> ~/.profile
   echo -e "export PATH=\$PATH:\$JAVA_HOME/bin" | cat >> ~/.profile
 fi
-
-######################################################################
-# Download and install Hadoop and Spark
-######################################################################
 
 # Path to S3 bucket for downloading Hadoop and Spark
 S3_BUCKET=https://s3-us-west-2.amazonaws.com/insight-tech

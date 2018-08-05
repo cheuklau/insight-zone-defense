@@ -10,32 +10,27 @@ TF_VAR_AWS_SECRET_KEY = <your-secret-key>
 
 */
 
-# Variables used in provider.tf
 variable "AWS_ACCESS_KEY" {}
-variable "AWS_SECRET_KEY" {}
-variable "AWS_REGION" {
-	default = "us-west-2"
-}
 
-# Variables used in instance.tf
+variable "AWS_SECRET_KEY" {}
+
+variable "AWS_REGION" { default = "us-west-2" }
+
+# Overwritten by build.sh
 variable "AMIS" {
   type = "map"
   default = {
     spark    = "ami-07aac5ac970466648"
-    postgres = "ami-0bc4e1746a5de0c2a"
-    flask    = "todo"
+    postgres = "ami-094934ed630063584"
+    flask    = "ami-06d51f494c653bf59"
   }
 }
-variable "NUM_WORKERS" {
-  default = 2
-}
 
-# Variables used in key.tf
-variable "PATH_TO_PUBLIC_KEY" {
-  default = "mykeypair.pub"
-}
+# Overwritten by build.sh
+variable "NUM_WORKERS" { default = 2 }
 
-# Variables
-variable "PATH_TO_PRIVATE_KEY" {
-  default = "/Users/cheuklau/Documents/GitHub/insight_devops_project/devops/Initial/test/mykeypair"
-}
+# Overwritten by build.sh
+variable "PATH_TO_PUBLIC_KEY" { default = "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single/terraform/mykeypair.pub" }
+
+# Overwritten by build.sh
+variable "PATH_TO_PRIVATE_KEY" { default = "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single/terraform/mykeypair" }

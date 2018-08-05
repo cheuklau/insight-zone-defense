@@ -4,24 +4,22 @@ from flask import render_template, request, redirect
 from flask import stream_with_context, Response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
-# from flask_cassandra import CassandraCluster
 from datetime import datetime
 from collections import OrderedDict
 
-
+# Create app object
 app = Flask(__name__)
 app.config.from_object('config.DevelopmentConfig')
+
+# Create Google Map keys
 GoogleMapsKey = app.config["GOOGLEMAPSKEY"]
 GoogleMapsJSKey = app.config["GOOGLEMAPSJSKEY"]
-
-db = SQLAlchemy(app)
-
-# todo: add back in after base devops pipeline is created
-# cassandra = CassandraCluster()
-
 gmaps = googlemaps.Client(key=GoogleMapsKey)
 API_url = "https://maps.googleapis.com/maps/api/js?key="\
         + GoogleMapsJSKey + "&callback=initMap"
+
+# Create database object
+db = SQLAlchemy(app)
 
 # Parameter codes for asthma-causing pollutants
 ozone_code = 44201
@@ -34,7 +32,6 @@ sf['lat'] = 41.8781136
 sf['lon'] = -87.6297982
 
 import models
-
 
 def get_pollutant_records(session, data, grid_id, parameter):
     '''
@@ -50,20 +47,6 @@ def get_pollutant_records(session, data, grid_id, parameter):
         if not data.get(time):
             data[time] = dict()
         data[time][parameter] = record.c
-
-''' todo: add back in after base devops pipeline is created
-def get_pollution_data(grid_id):
-    # Connect to Cassandra database and obtain pollution data
-    session = cassandra.connect()
-    session.set_keyspace("air")
-
-    data = dict()
-    get_pollutant_records(session, data, grid_id, ozone_code)
-    get_pollutant_records(session, data, grid_id, pm_frm_code)
-    get_pollutant_records(session, data, grid_id, pm_code)
-
-    return OrderedDict(sorted(data.items(), key=lambda t: t[0]))
-'''
 
 def get_ozone_and_pm(record):
     '''
@@ -91,19 +74,6 @@ def get_ozone_and_pm(record):
 
     return ['{:.2f}'.format(1000*ozone) if ozone is not None else '',
             '{:.2f}'.format(pm_average) if pm_average is not None else '']
-
-#todo: add back in after base devops pipeline is created
-#def make_csv(grid_id):
-#    '''
-#    This function makes csv file with the full air pollution history for a given grid point
-#    '''
-#    data = get_pollution_data(grid_id)
-#
-#    yield ",".join(["Timestamp", "Ozone [ppb]", "PM2.5 [mcg/m3]"]) + '\n'
-#    for timestep, record in data.items():
-#        yield ","\
-#            .join([item for sublist in [[timestep], get_ozone_and_pm(record)]
-#                  for item in sublist]) + '\n'
 
 def get_coordinates_from_address(address_request):
     '''
@@ -141,26 +111,6 @@ def get_coordinates_from_address(address_request):
 
     return latitude, longitude, ''
 
-''' todo: add back in after base devops pipeline is created
-@app.route('/download', methods=['GET', 'POST'])
-def download():
-
-    if request.method == 'GET':
-        return redirect('/')
-
-    elif request.method == 'POST':
-        grid_id = request.form['grid_id']
-        return Response(
-            stream_with_context(make_csv(grid_id)),
-            mimetype='text/csv',
-            headers={
-                "Content-Disposition":
-                "attachment; filename=data_grid_{}.csv".format(grid_id)
-            }
-        )
-
-'''
-
 def pollution_level(c, moderate, bad):
     '''
     Determine pollution level based on thresholds
@@ -173,7 +123,6 @@ def pollution_level(c, moderate, bad):
         result = 'bad'
 
     return result
-
 
 @app.route('/', methods=['GET', 'POST'])
 def dashboard():
@@ -215,6 +164,8 @@ def dashboard():
                             sf['lon'],
                             'Location you entered is too far from air quality monitors'
                         )
+
+                    # This actually causes an infinite loop if you don't have both ozone and pm data
                     return rendered_webpage
 
                 ozone_current = ozone_data[-1][1]

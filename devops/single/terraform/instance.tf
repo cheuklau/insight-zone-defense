@@ -3,6 +3,7 @@
 instance.tf
 
 This file creates our instances.
+todo: tighter VPC and subnet definitions for each instance.
 
 */
 
@@ -15,9 +16,9 @@ resource "aws_instance" "postgres" {
   instance_type = "m4.large"
   key_name = "${aws_key_pair.mykeypair.key_name}"
   count = 1
-  vpc_security_group_ids = ["${aws_security_group.open-security-group.id}"] # Change later to private
-  subnet_id = "${aws_subnet.main-public.id}" # Change later to private
-  associate_public_ip_address = true # Change later to false
+  vpc_security_group_ids = ["${aws_security_group.open-security-group.id}"]
+  subnet_id = "${aws_subnet.main-public.id}"
+  associate_public_ip_address = true
   root_block_device {
     volume_size = 100
     volume_type = "standard"
@@ -32,65 +33,6 @@ resource "aws_instance" "postgres" {
 ##############################################
 # Spark
 ##############################################
-
-# Controller
-resource "aws_instance" "spark-controller" {
-  ami = "${lookup(var.AMIS, "spark")}"
-  instance_type = "m4.large"
-  key_name = "${aws_key_pair.mykeypair.key_name}"
-  count = 1
-  vpc_security_group_ids = ["${aws_security_group.open-security-group.id}"] # Change later to private
-  subnet_id = "${aws_subnet.main-public.id}" # Change later to private
-  associate_public_ip_address = true # Change later to false
-  root_block_device {
-    volume_size = 100
-    volume_type = "standard"
-  }
-  tags {
-    Name = "spark-controller"
-    Environment = "dev"
-    Terraform = "true"
-  }  
-}
-
-# Configure controller
-resource "null_resource" "spark-controller" {
-
-  # Establish connection to worker
-  connection {
-    type = "ssh"
-    user = "ubuntu"  
-    host = "${aws_instance.spark-controller.public_ip}"
-    private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
-  }
-
-  # Provision the Spark setup script
-  provisioner "file" {
-    source = "scripts/spark_setup_single.sh"
-    destination = "/tmp/spark_setup_single.sh"
-  }
-
-  # Provision the Spark start script
-  provisioner "file" {
-    source = "scripts/spark_start.sh"
-    destination = "/tmp/spark_start.sh"
-  }
-
-  # Execute spark configuration commands remotely
-  provisioner "remote-exec" {
-    inline = [
-      "echo \"export AWS_ACCESS_KEY_ID='${var.AWS_ACCESS_KEY}'\nexport AWS_SECRET_ACCESS_KEY='${var.AWS_SECRET_KEY}'\nexport AWS_DEFAULT_REGION='${var.AWS_REGION}'\" >> ~/.profile",
-      "chmod +x /tmp/spark_setup_single.sh",
-      "bash /tmp/spark_setup_single.sh '${aws_instance.spark-controller.public_dns}'",
-      "chmod +x /tmp/spark_start.sh",
-      "bash /tmp/spark_start.sh",
-      "sudo pip install configparser",
-      "sudo pip --no-cache-dir install pyspark",
-      "sudo apt-get install git-core",
-      "git clone https://github.com/cheuklau/insight_devops_project.git"
-    ]
-  }
-}
 
 # Master 
 resource "aws_instance" "spark-master" {
@@ -120,9 +62,9 @@ resource "aws_instance" "spark-worker" {
   instance_type = "m4.large"
   key_name = "${aws_key_pair.mykeypair.key_name}"
   count = "${var.NUM_WORKERS}"
-  vpc_security_group_ids = ["${aws_security_group.open-security-group.id}"] # Change later to private
-  subnet_id = "${aws_subnet.main-public.id}" # Change later to private
-  associate_public_ip_address = true # Change later to false
+  vpc_security_group_ids = ["${aws_security_group.open-security-group.id}"]
+  subnet_id = "${aws_subnet.main-public.id}"
+  associate_public_ip_address = true
   root_block_device {
     volume_size = 100
     volume_type = "standard"
@@ -207,7 +149,6 @@ resource "null_resource" "spark-master" {
     destination = "/tmp/spark_start.sh"
   }
 
-  # TEST -- Need private key in master to communicate with slave nodes?!?!
   provisioner "file" {
     source = "${var.PATH_TO_PRIVATE_KEY}"
     destination = "/tmp/${aws_key_pair.mykeypair.key_name}"
@@ -282,6 +223,111 @@ resource "null_resource" "spark-worker" {
       "bash /tmp/hadoop_config_datanode.sh",
       "chmod +x /tmp/spark_setup_single.sh",
       "bash /tmp/spark_setup_single.sh '${element(aws_instance.spark-worker.*.public_dns, "${count.index}")}'",
+    ]
+  }
+}
+
+# Controller
+resource "aws_instance" "spark-controller" {
+  ami = "${lookup(var.AMIS, "spark")}"
+  instance_type = "m4.large"
+  key_name = "${aws_key_pair.mykeypair.key_name}"
+  count = 1
+  vpc_security_group_ids = ["${aws_security_group.open-security-group.id}"]
+  subnet_id = "${aws_subnet.main-public.id}"
+  associate_public_ip_address = true
+  root_block_device {
+    volume_size = 100
+    volume_type = "standard"
+  }
+  tags {
+    Name = "spark-controller"
+    Environment = "dev"
+    Terraform = "true"
+  }  
+}
+
+# Configure controller
+resource "null_resource" "spark-controller" {
+
+  # Establish connection to worker
+  connection {
+    type = "ssh"
+    user = "ubuntu"  
+    host = "${aws_instance.spark-controller.public_ip}"
+    private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
+  }
+
+  # Provision the Spark setup script
+  provisioner "file" {
+    source = "scripts/spark_setup_single.sh"
+    destination = "/tmp/spark_setup_single.sh"
+  }
+
+  # Provision the Spark start script
+  provisioner "file" {
+    source = "scripts/spark_start.sh"
+    destination = "/tmp/spark_start.sh"
+  }
+
+  # Provision the Spark controller script
+  provisioner "file" {
+    source = "scripts/spark_setup_controller.sh"
+    destination = "/tmp/spark_setup_controller.sh"
+  }
+
+  # Execute spark configuration commands remotely
+  provisioner "remote-exec" {
+    inline = [
+      "echo \"export AWS_ACCESS_KEY_ID='${var.AWS_ACCESS_KEY}'\nexport AWS_SECRET_ACCESS_KEY='${var.AWS_SECRET_KEY}'\nexport AWS_DEFAULT_REGION='${var.AWS_REGION}'\" >> ~/.profile",
+      "chmod +x /tmp/spark_setup_single.sh",
+      "bash /tmp/spark_setup_single.sh '${aws_instance.spark-controller.public_dns}'",
+      "chmod +x /tmp/spark_start.sh",
+      "bash /tmp/spark_start.sh",
+      "chmod +x /tmp/spark_setup_controller.sh '${aws_instance.postgres.private_dns}' '${aws_instance.spark-master.private_dns}'",
+    ]
+  }
+}
+
+##############################################
+# Flask
+##############################################
+
+resource "aws_instance" "flask" {
+  ami = "${lookup(var.AMIS, "flask")}"
+  instance_type = "m4.large"
+  key_name = "${aws_key_pair.mykeypair.key_name}"
+  count = 1
+  vpc_security_group_ids = ["${aws_security_group.open-security-group.id}"]
+  subnet_id = "${aws_subnet.main-public.id}"
+  associate_public_ip_address = true
+  tags {
+    Name = "flask"
+    Environment = "dev"
+    Terraform = "true"
+  }
+}
+
+resource "null_resource" "flask" {
+
+  # Establish connection to worker
+  connection {
+    type = "ssh"
+    user = "ubuntu"  
+    host = "${aws_instance.flask.public_ip}"
+    private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
+  }
+
+  # Provision the Flask setup script
+  provisioner "file" {
+    source = "scripts/start-flask.sh"
+    destination = "/tmp/start-flask.sh"
+  }
+
+  # Execute Flask configuration commands remotely
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/start-flask.sh '${aws_instance.postgres.private_dns}'",
     ]
   }
 }

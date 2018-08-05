@@ -7,7 +7,7 @@ This file sets up the virtual private cloud.
 */
 
 ##############################################
-# Single cloud VPC
+# Main VPC
 ##############################################
 
 resource "aws_vpc" "main" {
@@ -22,7 +22,8 @@ resource "aws_vpc" "main" {
 }
 
 ##############################################
-# Subnets
+# Subnet
+# todo: Create private subnet
 ##############################################
 
 # Public
@@ -36,21 +37,8 @@ resource "aws_subnet" "main-public" {
     }
 }
 
-/*
-# Private
-resource "aws_subnet" "main-private" {
-    vpc_id = "${aws_vpc.main.id}"
-    cidr_block = "10.0.1.0/28"
-    map_public_ip_on_launch = "false" # Set to false for private subnets
-    availability_zone = "us-west-2a"
-    tags {
-        Name = "main-private"
-    }
-}
-*/
-
 ##############################################
-# Internet GW
+# Internet gateway
 ##############################################
 
 resource "aws_internet_gateway" "main-gw" {

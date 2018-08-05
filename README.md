@@ -100,7 +100,7 @@ The following software must be installed into your local environment:
 
 Clone the repository:
 
-`git clone https://github.com/cheuklau/insight_devops_project.git`
+`git clone https://github.com/cheuklau/insight_devops_airaware.git`
 
 ### Download Data into S3
 

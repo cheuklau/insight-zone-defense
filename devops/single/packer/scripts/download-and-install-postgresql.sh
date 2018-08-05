@@ -18,15 +18,15 @@ sudo pip install configparser
 sudo pip install psycopg2
 sudo pip install numpy
 
-# Install boto
+# Install Boto
 sudo pip install boto
 sudo pip install boto3
 
-# Install postgresql and postgis extension
+# Install Postgresql and Postgis extension
 sudo apt-get install -y postgresql
 sudo apt-get install -y postgis
 
-# Log into postgresql as postgres
+# Log into Postgresql as Postgres
 sudo -u postgres psql << EOF
 CREATE DATABASE monthlydb;
 CREATE USER cheuklau;
@@ -38,10 +38,10 @@ EOF
 
 # Install Git and clone repository
 sudo apt-get install git-core
-git clone https://github.com/cheuklau/insight_devops_project.git
+git clone https://github.com/cheuklau/insight_devops_airaware.git
 
 # Run DE postgresql application
-cd insight_devops_project/AirAware/postgres
+cd insight_devops_airaware/AirAware/postgres
 python create_tables.py
 python grid_make.py
 

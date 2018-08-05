@@ -310,14 +310,7 @@ def main(argv):
         'password': config["postgres"]["password"]
     }
 
-    # todo: add this back in after base devops pipeline created
-    # cassandra server
-    # cassandra_url = config["cassandra"]["dns"]
-    # cassandra_username = config["cassandra"]["user"]
-    # cassandra_password = config["cassandra"]["password"]
-
     # postgreSQL and cassandra keywords
-    # table_hourly = 'measurements_hourly'
     table_monthly = "measurements_monthly"
 
     ###################################################
@@ -343,31 +336,19 @@ def main(argv):
     # Create Spark session and context
     ###################################################
 
-    #conf = SparkConf().set("spark.cassandra.connection.host", cassandra_url)\
-    #                  .set("spark.cassandra.auth.username", cassandra_username)\
-    #                  .set("spark.cassandra.auth.password", cassandra_password)
-    #sc = SparkContext(spark_url, data_fname, conf=conf)
-
-    # todo: add configuration for cassandra after base devops pipeline created
-    conf = SparkConf().set("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")\
-                      .set("spark.executor.extraClassPath", "/usr/local/spark/lib/aws-java-sdk-1.7.4.jar:/usr/local/spark/lib/hadoop-aws-2.7.6.jar:/usr/local/spark/lib/postgresql-42.2.4.jar")\
-                      .set("spark.driver.extraClassPath", "/usr/local/spark/lib/aws-java-sdk-1.7.4.jar:/usr/local/spark/lib/hadoop-aws-2.7.6.jar:/usr/local/spark/lib/postgresql-42.2.4.jar")\
-                      .set("spark.hadoop.fs.s3a.access.key", "<access-key>")\
-                      .set("spark.hadoop.fs.s3a.secret.key", "<secret-key>")
-    sc = SparkContext(spark_url, data_fname, conf=conf)
+    #conf = SparkConf().set("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")\
+    #                  .set("spark.executor.extraClassPath", "/usr/local/spark/lib/aws-java-sdk-1.7.4.jar:/usr/local/spark/lib/hadoop-aws-2.7.6.jar:/usr/local/spark/lib/postgresql-42.2.4.jar")\
+    #                  .set("spark.driver.extraClassPath", "/usr/local/spark/lib/aws-java-sdk-1.7.4.jar:/usr/local/spark/lib/hadoop-aws-2.7.6.jar:/usr/local/spark/lib/postgresql-42.2.4.jar")\
+    #                  .set("spark.hadoop.fs.s3a.access.key", "<access-key>")\
+    #                  .set("spark.hadoop.fs.s3a.secret.key", "<secret-key>")
+    # sc = SparkContext(spark_url, data_fname, conf=conf)
+    sc = SparkContext(spark_url, data_fname)
     spark = SparkSession(sc)
     sqlContext = SQLContext(sc)
 
     ###################################################
     # Schemas for converting RDDs to DataFrames & writing to databases
     ###################################################
-
-    #schema_hourly = StructType([
-    #    StructField("grid_id", IntegerType(), False),
-    #    StructField("parameter", IntegerType(), False),
-    #    StructField("time", TimestampType(), False),
-    #    StructField("c", FloatType(), False)
-    #])
 
     schema_monthly = StructType([
         StructField("grid_id", IntegerType(), False),
@@ -394,19 +375,6 @@ def main(argv):
         .reduceByKey(sum_weight_and_prods)\
         .map(calc_weighted_average_grid)\
         .persist(StorageLevel.MEMORY_AND_DISK)
-
-    ###################################################
-    # Write them to Cassandra database
-    ###################################################
-
-    #data_hourly_df = spark\
-    #    .createDataFrame(data_hourly, schema_hourly)\
-    #    .sort("grid_id")\
-    #    .write\
-    #    .format("org.apache.spark.sql.cassandra")\
-    #    .mode('append')\
-    #    .options(table=table_hourly, keyspace="air")\
-    #    .save()
 
     ###################################################
     # Average pollution levels for each month

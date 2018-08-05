@@ -5,7 +5,7 @@
     "aws_region": "us-west-2",
     "aws_ami_image": "ami-ba602bc2",
     "aws_instance_type": "t2.micro",
-    "image_version" : "0.0.1"
+    "image_version" : "1.0"
   },
   "builders": [{
     "type": "amazon-ebs",
@@ -15,13 +15,12 @@
     "source_ami": "{{user `aws_ami_image`}}",
     "instance_type": "{{user `aws_instance_type`}}",
     "ssh_username": "ubuntu",
-    "ami_name": "insight-packer-flask"
+    "ami_name": "insight-packer-flask-1.0"
   }],
   "provisioners": [{
     "type": "shell",
     "scripts": [  
-      "scripts/setup-and-deploy-flask.sh"
-    ],
-    "pause_before": "30s"
+      "scripts/download-and-install-flask.sh"
+    ]
   }]
 }
