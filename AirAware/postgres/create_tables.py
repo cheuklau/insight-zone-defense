@@ -1,8 +1,7 @@
-import configparser
 import psycopg2
 import sys
 import os
-
+#import configparser
 
 def create_tables():
     '''
@@ -36,12 +35,14 @@ def create_tables():
 
     # Read in configuration file
 
-    config = configparser.ConfigParser()
-    config.read('../setup.cfg')
+    #config = configparser.ConfigParser()
+    #config.read('../setup.cfg')
 
-    postgres_url = 'postgresql://'\
-                   + config["postgres"]["user"] + ':' + config["postgres"]["password"]\
-                   + '@localhost:' + config["postgres"]["port"] + '/' + config["postgres"]["db"]
+    #postgres_url = 'postgresql://'\
+    #               + config["postgres"]["user"] + ':' + config["postgres"]["password"]\
+    #               + '@localhost:' + config["postgres"]["port"] + '/' + config["postgres"]["db"]
+
+    postgres_url = 'postgresql://cheuklau:insight@localhost:5432/monthlydb'
 
     conn = None
     try:

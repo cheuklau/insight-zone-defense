@@ -1,4 +1,4 @@
-import configparser
+#import configparser
 import numpy
 import json
 import psycopg2
@@ -12,13 +12,15 @@ def insert_records(commands):
     '''
     # Read in configuration file
 
-    config = configparser.ConfigParser()
-    config.read('../setup.cfg')
+    #config = configparser.ConfigParser()
+    #config.read('../setup.cfg')
 
-    postgres_url = 'postgresql://'\
-                   + config["postgres"]["user"] + ':' + config["postgres"]["password"]\
-                   + '@localhost:' + config["postgres"]["port"] + '/' + config["postgres"]["db"]
+    #postgres_url = 'postgresql://'\
+    #               + config["postgres"]["user"] + ':' + config["postgres"]["password"]\
+    #               + '@localhost:' + config["postgres"]["port"] + '/' + config["postgres"]["db"]
 
+    postgres_url = 'postgresql://cheuklau:insight@localhost:5432/monthlydb'
+    
     conn = None
     try:
         # connect to the PostgreSQL server

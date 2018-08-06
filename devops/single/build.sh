@@ -8,7 +8,7 @@
 ####################################################################
 
 # Number of Spark worker nodes
-NSPARK=2
+NSPARK=3
 
 # Path to public and private keys
 PUBLICKEY='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single/terraform/mykeypair.pub'

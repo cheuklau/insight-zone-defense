@@ -335,13 +335,7 @@ def main(argv):
     ###################################################
     # Create Spark session and context
     ###################################################
-
-    #conf = SparkConf().set("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")\
-    #                  .set("spark.executor.extraClassPath", "/usr/local/spark/lib/aws-java-sdk-1.7.4.jar:/usr/local/spark/lib/hadoop-aws-2.7.6.jar:/usr/local/spark/lib/postgresql-42.2.4.jar")\
-    #                  .set("spark.driver.extraClassPath", "/usr/local/spark/lib/aws-java-sdk-1.7.4.jar:/usr/local/spark/lib/hadoop-aws-2.7.6.jar:/usr/local/spark/lib/postgresql-42.2.4.jar")\
-    #                  .set("spark.hadoop.fs.s3a.access.key", "<access-key>")\
-    #                  .set("spark.hadoop.fs.s3a.secret.key", "<secret-key>")
-    # sc = SparkContext(spark_url, data_fname, conf=conf)
+    
     sc = SparkContext(spark_url, data_fname)
     spark = SparkSession(sc)
     sqlContext = SQLContext(sc)

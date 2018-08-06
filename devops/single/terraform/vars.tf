@@ -28,7 +28,7 @@ variable "AMIS" {
 }
 
 # Overwritten by build.sh
-variable "NUM_WORKERS" { default = 2 }
+variable "NUM_WORKERS" { default = 3 }
 
 # Overwritten by build.sh
 variable "PATH_TO_PUBLIC_KEY" { default = "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single/terraform/mykeypair.pub" }
