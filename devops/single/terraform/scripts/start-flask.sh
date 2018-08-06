@@ -1,12 +1,17 @@
 #!/bin/bash
 
 postgres=$1
+sparkmaster=$2
 
-# Configure setup.cfg with Postgres private DNS
-sed -i 's/dns-postgres.*/dns = ${postgres}'
+APPHOME='/home/ubuntu/insight_devops_airaware/AirAware'
+
+# Configure setup.cfg with Postgres and Spark master private DNS
+sed -i "/dns-postgres/c\dns = ${postgres}" ${APPHOME}/setup.cfg
+sed -i "/dns-spark/c\dns = ${sparkmaster}:7077" ${APPHOME}/setup.cfg
 
 # Install gunicorn
 sudo pip install gunicorn
 
 # Deploy app
-nohup gunicorn app:app -b 0.0.0.0:8000
+cd ${APPHOME}/flask
+gunicorn app:app --bind=0.0.0.0:8000 --daemon

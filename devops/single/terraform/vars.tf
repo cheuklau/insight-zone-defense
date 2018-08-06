@@ -14,15 +14,16 @@ variable "AWS_ACCESS_KEY" {}
 
 variable "AWS_SECRET_KEY" {}
 
+# Overwritten by build.sh
 variable "AWS_REGION" { default = "us-west-2" }
 
 # Overwritten by build.sh
 variable "AMIS" {
   type = "map"
   default = {
-    spark    = "ami-07aac5ac970466648"
-    postgres = "ami-094934ed630063584"
-    flask    = "ami-06d51f494c653bf59"
+    spark = "ami-029fc6d35c1076380"
+    postgres = "ami-0b2477254946928c4"
+    flask = "ami-0e706ec7ba377864a"
   }
 }
 

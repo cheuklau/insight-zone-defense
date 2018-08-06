@@ -8,6 +8,27 @@ todo: tighter VPC and subnet definitions for each instance.
 */
 
 ##############################################
+# Prometheus
+# todo: build an AMI with prometheus installed
+#       right now we are just testing it
+##############################################
+
+resource "aws_instance" "prometheus" {
+  ami = "ami-ba602bc2"
+  instance_type = "t2.small"
+  key_name = "${aws_key_pair.mykeypair.key_name}"
+  count = 1
+  vpc_security_group_ids = ["${aws_security_group.open-security-group.id}"]
+  subnet_id = "${aws_subnet.main-public.id}"
+  associate_public_ip_address = true
+  tags {
+    Name = "prometheus"
+    Environment = "dev"
+    Terraform = "true"
+  } 
+}
+
+##############################################
 # Postgres
 ##############################################
 
@@ -30,9 +51,9 @@ resource "aws_instance" "postgres" {
   } 
 }
 
-##############################################
-# Spark
-##############################################
+# ##############################################
+# # Spark
+# ##############################################
 
 # Master 
 resource "aws_instance" "spark-master" {
@@ -78,6 +99,54 @@ resource "aws_instance" "spark-worker" {
   }
 }
 
+# Configure workers
+resource "null_resource" "spark-worker" {
+
+  count = "${var.NUM_WORKERS}"
+
+  # Establish connection to worker
+  connection {
+    type = "ssh"
+    user = "ubuntu"    
+    host = "${element(aws_instance.spark-worker.*.public_ip, "${count.index}")}"
+    private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
+  }
+
+  # We need the master and slaves spun up first
+  depends_on = [ "aws_instance.spark-master", "aws_instance.spark-worker" ]
+
+  # Provision the Hadoop configuration script
+  provisioner "file" {
+    source = "scripts/hadoop_setup_single.sh"
+    destination = "/tmp/hadoop_setup_single.sh"
+  }
+
+  # Provision the Hadoop configuration script
+  provisioner "file" {
+    source = "scripts/hadoop_config_datanode.sh"
+    destination = "/tmp/hadoop_config_datanode.sh"
+  }
+
+  # Provision the Spark setup script
+  provisioner "file" {
+    source = "scripts/spark_setup_single.sh"
+    destination = "/tmp/spark_setup_single.sh"
+  }
+
+  # Execute spark configuration script remotely
+  provisioner "remote-exec" {
+    inline = [
+      "echo \"export AWS_ACCESS_KEY_ID='${var.AWS_ACCESS_KEY}'\nexport AWS_SECRET_ACCESS_KEY='${var.AWS_SECRET_KEY}'\nexport AWS_DEFAULT_REGION='${var.AWS_REGION}'\" >> ~/.profile",
+      "chmod +x /tmp/hadoop_setup_single.sh",
+      "bash /tmp/hadoop_setup_single.sh '${aws_instance.spark-master.public_dns}' '${var.AWS_ACCESS_KEY}' '${var.AWS_SECRET_KEY}'",
+      "chmod +x /tmp/hadoop_config_datanode.sh",
+      "bash /tmp/hadoop_config_datanode.sh",
+      "chmod +x /tmp/spark_setup_single.sh",
+      "bash /tmp/spark_setup_single.sh '${element(aws_instance.spark-worker.*.public_dns, "${count.index}")}'",
+    ]
+  }
+}
+
 # Configure master
 resource "null_resource" "spark-master" {
 
@@ -88,6 +157,9 @@ resource "null_resource" "spark-master" {
     host = "${aws_instance.spark-master.public_ip}"
     private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
   }
+
+  # We need the slaves configured first
+  depends_on = [ "null_resource.spark-worker" ]
 
   # Provision the SSH configuration script
   provisioner "file" {
@@ -182,51 +254,6 @@ resource "null_resource" "spark-master" {
   }
 }
 
-# Configure worker
-resource "null_resource" "spark-worker" {
-
-  count = "${var.NUM_WORKERS}"
-
-  # Establish connection to worker
-  connection {
-    type = "ssh"
-    user = "ubuntu"    
-    host = "${element(aws_instance.spark-worker.*.public_ip, "${count.index}")}"
-    private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
-  }
-
-  # Provision the Hadoop configuration script
-  provisioner "file" {
-    source = "scripts/hadoop_setup_single.sh"
-    destination = "/tmp/hadoop_setup_single.sh"
-  }
-
-  # Provision the Hadoop configuration script
-  provisioner "file" {
-    source = "scripts/hadoop_config_datanode.sh"
-    destination = "/tmp/hadoop_config_datanode.sh"
-  }
-
-  # Provision the Spark setup script
-  provisioner "file" {
-    source = "scripts/spark_setup_single.sh"
-    destination = "/tmp/spark_setup_single.sh"
-  }
-
-  # Execute spark configuration script remotely
-  provisioner "remote-exec" {
-    inline = [
-      "echo \"export AWS_ACCESS_KEY_ID='${var.AWS_ACCESS_KEY}'\nexport AWS_SECRET_ACCESS_KEY='${var.AWS_SECRET_KEY}'\nexport AWS_DEFAULT_REGION='${var.AWS_REGION}'\" >> ~/.profile",
-      "chmod +x /tmp/hadoop_setup_single.sh",
-      "bash /tmp/hadoop_setup_single.sh '${aws_instance.spark-master.public_dns}' '${var.AWS_ACCESS_KEY}' '${var.AWS_SECRET_KEY}'",
-      "chmod +x /tmp/hadoop_config_datanode.sh",
-      "bash /tmp/hadoop_config_datanode.sh",
-      "chmod +x /tmp/spark_setup_single.sh",
-      "bash /tmp/spark_setup_single.sh '${element(aws_instance.spark-worker.*.public_dns, "${count.index}")}'",
-    ]
-  }
-}
-
 # Controller
 resource "aws_instance" "spark-controller" {
   ami = "${lookup(var.AMIS, "spark")}"
@@ -244,7 +271,7 @@ resource "aws_instance" "spark-controller" {
     Name = "spark-controller"
     Environment = "dev"
     Terraform = "true"
-  }  
+  }
 }
 
 # Configure controller
@@ -257,6 +284,9 @@ resource "null_resource" "spark-controller" {
     host = "${aws_instance.spark-controller.public_ip}"
     private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
   }
+
+  # We need postgres and spark cluster configured first
+  depends_on = [ "aws_instance.postgres", "null_resource.spark-master", "null_resource.spark-worker" ]
 
   # Provision the Spark setup script
   provisioner "file" {
@@ -284,7 +314,8 @@ resource "null_resource" "spark-controller" {
       "bash /tmp/spark_setup_single.sh '${aws_instance.spark-controller.public_dns}'",
       "chmod +x /tmp/spark_start.sh",
       "bash /tmp/spark_start.sh",
-      "chmod +x /tmp/spark_setup_controller.sh '${aws_instance.postgres.private_dns}' '${aws_instance.spark-master.private_dns}'",
+      "chmod +x /tmp/spark_setup_controller.sh",
+      "bash /tmp/spark_setup_controller.sh '${aws_instance.postgres.private_dns}' '${aws_instance.spark-master.private_dns}'",
     ]
   }
 }
@@ -318,6 +349,9 @@ resource "null_resource" "flask" {
     private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
   }
 
+  # We need postgres spun up first
+  depends_on = [ "aws_instance.postgres" ]
+
   # Provision the Flask setup script
   provisioner "file" {
     source = "scripts/start-flask.sh"
@@ -327,7 +361,8 @@ resource "null_resource" "flask" {
   # Execute Flask configuration commands remotely
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /tmp/start-flask.sh '${aws_instance.postgres.private_dns}'",
+      "chmod +x /tmp/start-flask.sh",
+      "bash /tmp/start-flask.sh '${aws_instance.postgres.private_dns}' '${aws_instance.spark-master.private_dns}'",
     ]
   }
 }
