@@ -9,12 +9,10 @@ todo: tighter VPC and subnet definitions for each instance.
 
 ##############################################
 # Prometheus
-# todo: build an AMI with prometheus installed
-#       right now we are just testing it
 ##############################################
 
 resource "aws_instance" "prometheus" {
-  ami = "ami-ba602bc2"
+  ami = "${lookup(var.AMIS, "ubuntu")}" 
   instance_type = "t2.small"
   key_name = "${aws_key_pair.mykeypair.key_name}"
   count = 1
@@ -26,6 +24,37 @@ resource "aws_instance" "prometheus" {
     Environment = "dev"
     Terraform = "true"
   } 
+}
+
+# Configure prometheus
+resource "null_resource" "prometheus" {
+
+  # Establish connection to worker
+  connection {
+    type = "ssh"
+    user = "ubuntu"    
+    host = "${aws_instance.prometheus.public_ip}"
+    private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
+  }
+
+  # We need the prometheus instance first
+  # We don't need other instances up first because we are using EC2 service discovery
+  depends_on = [ "aws_instance.prometheus" ]
+
+  # Provision the Prometheus configuration script
+  provisioner "file" {
+    source = "scripts/full_prometheus_setup.sh"
+    destination = "/tmp/full_prometheus_setup.sh"
+  }
+
+  # Execute Prometheus configuration script remotely
+  provisioner "remote-exec" {
+    inline = [
+      "echo \"export AWS_ACCESS_KEY_ID='${var.AWS_ACCESS_KEY}'\nexport AWS_SECRET_ACCESS_KEY='${var.AWS_SECRET_KEY}'\nexport AWS_DEFAULT_REGION='${var.AWS_REGION}'\" >> ~/.profile",
+      "chmod +x /tmp/full_prometheus_setup.sh",
+      "bash /tmp/full_prometheus_setup.sh '${var.AWS_ACCESS_KEY}' '${var.AWS_SECRET_KEY}' '${var.AWS_REGION}' ",
+    ]
+  }
 }
 
 ##############################################
@@ -358,11 +387,19 @@ resource "null_resource" "flask" {
     destination = "/tmp/start-flask.sh"
   }
 
+  # Provision the Prometheus node exporter script
+  provisioner "file" {
+    source = "scripts/prometheus_node_exporter_setup.sh"
+    destination = "/tmp/prometheus_node_exporter_setup.sh"
+  }
+
   # Execute Flask configuration commands remotely
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/start-flask.sh",
       "bash /tmp/start-flask.sh '${aws_instance.postgres.private_dns}' '${aws_instance.spark-master.private_dns}'",
+      "chmod +x /tmp/prometheus_node_exporter_setup.sh",
+      "bash /tmp/prometheus_node_exporter_setup.sh",
     ]
   }
 }

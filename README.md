@@ -20,9 +20,10 @@ This repository contains the required files and write-up for Cheuk Lau's summer 
 5. [Build Instructions](README.md#build-instructions)
 	* Prerequisites
     * Download Data into S3
-    * Run Terraform and Packer
+    * Build Infrastructure using Terraform and Packer
+    * Run Spark Jobs
     * Monitor with Prometheus
-    * Event simulation
+    * Event Simulation
 6. [Conclusions](README.md#conclusions)
 7. [References](README.md#references)
 
@@ -104,28 +105,38 @@ Clone the repository:
 
 ### Download Data into S3
 
-Perform the following steps to download the EPA data into AWS S3:
+Perform the following steps to download the EPA data into AWS S3. First, create an S3 bucket called `epa-data` then perform the following:
 
-* Go to AWS console and navigate to `s3` under resources.
-* Create a new bucket called `epa-data`.
-* Login to an EC2 Ubuntu instance and perform the following:
-	* `sudo apt install python-minimal`
-	* `sudo apt-install python3`
-	* `curl -O https://bootstrap.pypa.io/get-pip.py`
-	* `python get-pip.py --user`
-	* `pip install awscli --upgrade --user`
-	* `sudo apt install unzip`
-	* `wget https://aqs.epa.gov/aqsweb/airdata/hourly_44201_****.zip` 
-	* `unzip https://aqs.epa.gov/aqsweb/airdata/hourly_44201_****.zip`
-	* `export AWS_ACCESS_KEY_ID=<insert AWS access key ID>`
-	* `export AWS_SECRET_ACCESS_KEY=<insert AWS secret key>`
-	* `aws s3 cp hourly_44201_****.csv s3://epa-data`
+* `wget https://aqs.epa.gov/aqsweb/airdata/hourly_44201_****.zip` 
+* `unzip https://aqs.epa.gov/aqsweb/airdata/hourly_44201_****.zip`
+* `export AWS_ACCESS_KEY_ID=<insert AWS access key ID>`
+* `export AWS_SECRET_ACCESS_KEY=<insert AWS secret key>`
+* `aws s3 cp hourly_44201_xxxx.csv s3://epa-data` where `xxxx` is the year of interest.
+* `aws s3 cp hourly_88101_xxxx.csv s3://epa-data`
 
-Repeat the above process for each year of interest. Note that `****` indicates the year.
+### Build Infrastructure using Terraform and Packer
 
-### Run Terraform and Packer
+* `cd insight_devops_airaware/devops/single` to build the single VPC infrastructure or `insight_devops_airaware/devops/multi` to build the multi-VPC infrastructure.
+* `vi build.sh` and change the user inputs as needed.
+* `./build.sh`
 
-TBD
+Running `build.sh` performs the following:
+
+* Calls Packer to build the Spark, Postgres, and Flask AMIs.
+* Calls Terraform to spin up Spark cluster, Spark controller, Postgresl, and Flask instances.
+
+The AirAware front-end is now visible at `<Flask-IP>:8000`. However, we first must run Spark jobs from the Spark controller in order for any data to be visible.
+
+### Run Spark Jobs
+
+Perform the following to submit Spark jobs:
+
+* `ssh ubuntu@<Spark-Controller-IP> -i mykeypair`
+* `cd insight_devops_airaware/AirAware/spark`
+* `spark-submit raw_batch.py hourly_44201_xxxx` where `xxxx` is the year of interest.
+* `spark-submit raw_batch.py hourly_88101_xxxx` where `xxxx` is the year of interest.
+
+Once the jobs are finished, the data can be viewed from `<Flask-IP>:8000`.
 
 ### Monitor with Prometheus
 
@@ -141,4 +152,4 @@ TBD
 
 ## References
 
-
+TBD

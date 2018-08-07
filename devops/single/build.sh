@@ -43,7 +43,7 @@ gsed -i "/scripts/c\ \ \ \ \"scripts\": \[ \"${PACKERHOME}/scripts/download-and-
 #packer build -machine-readable ${PACKERHOME}/packer-spark.json | tee ${PACKERHOME}/packer-spark.log
 #packer build -machine-readable ${PACKERHOME}/packer-postgresql.json | tee ${PACKERHOME}/packer-postgresql.log
 #packer build -machine-readable ${PACKERHOME}/packer-flask.json | tee ${PACKERHOME}/packer-flask.log
-#mv ${PACKERHOME}/*.log ${PACKERHOME}/logs
+mv ${PACKERHOME}/*.log ${PACKERHOME}/logs
 
 echo 'Updating Terraform options...'
 

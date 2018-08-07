@@ -22,8 +22,9 @@ variable "AMIS" {
   type = "map"
   default = {
     spark = "ami-029fc6d35c1076380"
-    postgres = "ami-0b2477254946928c4"
+    postgres = "ami-07ec95be36ba1b4f8"
     flask = "ami-0e706ec7ba377864a"
+    ubuntu = "ami-ba602bc2"
   }
 }
 
