@@ -57,6 +57,51 @@ resource "null_resource" "prometheus" {
   }
 }
 
+# Provision Grafana
+resource "null_resource" "grafana" {
+
+  # Establish connection to worker
+  connection {
+    type = "ssh"
+    user = "ubuntu"    
+    host = "${aws_instance.prometheus.public_ip}"
+    private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
+  }
+
+  # We need Prometheus and Grafana installed first
+  depends_on = [ "null_resource.prometheus" ]
+
+  # Provision the Grafana datasource file
+  provisioner "file" {
+    source = "scripts/datasource-prometheus.yaml"
+    destination = "/tmp/datasource-prometheus.yaml"
+  }
+
+  # Provision the Grafana dashboard file
+  provisioner "file" {
+    source = "scripts/dashboards.yaml"
+    destination = "/tmp/dashboards.yaml"
+  }
+
+  # Provision the Grafana dashboard JSON file
+  provisioner "file" {
+    source = "scripts/dashboards.json"
+    destination = "/tmp/dashboards.json"
+  }
+
+  # Move Prometheus configuration script remotely
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mv /tmp/datasource-prometheus.yaml /etc/grafana/provisioning/datasources/",
+      "sudo mkdir /etc/grafana/provisioning/dashboards",
+      "sudo mv /tmp/dashboards.yaml /etc/grafana/provisioning/dashboards/",
+      "sudo mv /tmp/dashboards.json /var/lib/grafana/dashboards/",
+      "sudo systemctl restart grafana-server.service",
+    ]
+  }
+}
+
+
 ##############################################
 # Postgres
 ##############################################
