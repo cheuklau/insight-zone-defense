@@ -18,7 +18,7 @@ PRIVATEKEY='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/sing
 REGION='us-west-2'
 
 # Packer image version
-PACKERV='3.0'
+PACKERV='4.0'
 
 # Directories
 PACKERHOME='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single_with_asg/packer'

@@ -149,7 +149,12 @@ def dashboard():
             if not history_measurements:
                 # The grid point we found does not contain any historical
                 # data (for example, it is far from any air quality station)
-                continue
+
+                # continue
+
+                # Lets return to Github for now
+                # This means that there are no history measurements here.
+                return redirect("https://github.com/agaiduk/AirAware")
 
             else:
                 ozone = [x for x in history_measurements if x.parameter == ozone_code]

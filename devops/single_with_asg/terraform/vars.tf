@@ -21,9 +21,9 @@ variable "AWS_REGION" { default = "us-west-2" }
 variable "AMIS" {
   type = "map"
   default = {
-    spark = "ami-04e9f10f5641d1ce6"
-    postgres = "ami-0e73a8491548a4c06"
-    flask = "ami-0093dfa15ce0c443e"
+    spark = "ami-02108ce2dedbd8a09"
+    postgres = "ami-069e44284c50b1da1"
+    flask = "ami-0b922fd837e1971a2"
     ubuntu = "ami-ba602bc2"
   }
 }
