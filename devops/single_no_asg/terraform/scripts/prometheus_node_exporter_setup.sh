@@ -3,6 +3,9 @@
 # We need to install Prometheus and node-exporter to every server that
 # we wish to monitor with Prometheus.
 
+PROMETHEUS_VERSION="2.2.1"
+NODE_EXPORTER_VERSION="0.16.0"
+
 sudo su <<HERE
 
 ##################################################
@@ -10,7 +13,6 @@ sudo su <<HERE
 ##################################################
 
 # Download prometheus
-PROMETHEUS_VERSION="2.2.1"
 wget https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VERSION}/prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz
 tar -xzvf prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz
 cd prometheus-${PROMETHEUS_VERSION}.linux-amd64/
@@ -75,7 +77,6 @@ systemctl start prometheus
 ##################################################
 
 # Download and install Node Exporter
-NODE_EXPORTER_VERSION="0.16.0"
 wget https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
 tar -xzvf node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
 cd node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64

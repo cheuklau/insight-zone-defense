@@ -1,0 +1,24 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "aws_region": "us-west-2",
+    "aws_ami_image": "ami-5189a661",
+    "aws_instance_type": "m4.large",
+    "image_version" : "3.0"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "{{user `aws_region`}}",
+    "source_ami": "{{user `aws_ami_image`}}",
+    "instance_type": "{{user `aws_instance_type`}}",
+    "ssh_username": "ubuntu",
+    "ami_name" : "insight-packer-spark-3.0"
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "scripts": [ "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single_with_asg/packer/scripts/download-and-install-spark.sh" ]
+  }]
+}

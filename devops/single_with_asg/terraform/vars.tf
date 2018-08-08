@@ -21,9 +21,9 @@ variable "AWS_REGION" { default = "us-west-2" }
 variable "AMIS" {
   type = "map"
   default = {
-    spark = "ami-029fc6d35c1076380"
-    postgres = "ami-07ec95be36ba1b4f8"
-    flask = "ami-0e706ec7ba377864a"
+    spark = "ami-04e9f10f5641d1ce6"
+    postgres = "ami-0e73a8491548a4c06"
+    flask = "ami-001ceac5ef97db8b0"
     ubuntu = "ami-ba602bc2"
   }
 }
@@ -32,7 +32,7 @@ variable "AMIS" {
 variable "NUM_WORKERS" { default = 3 }
 
 # Overwritten by build.sh
-variable "PATH_TO_PUBLIC_KEY" { default = "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single/terraform/mykeypair.pub" }
+variable "PATH_TO_PUBLIC_KEY" { default = "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single_with_asg/terraform/mykeypair.pub" }
 
 # Overwritten by build.sh
-variable "PATH_TO_PRIVATE_KEY" { default = "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single/terraform/mykeypair" }
+variable "PATH_TO_PRIVATE_KEY" { default = "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single_with_asg/terraform/mykeypair" }

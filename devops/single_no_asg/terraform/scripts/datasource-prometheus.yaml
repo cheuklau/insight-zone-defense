@@ -1,0 +1,11 @@
+apiVersion: 1
+# Add one datasource with the name prometheus
+datasources:
+ - name: Prometheus
+   type: prometheus
+   orgId: 1
+   url: http://localhost:9090
+   access: proxy
+   version: 1
+   editable: false
+   isDefault: true
