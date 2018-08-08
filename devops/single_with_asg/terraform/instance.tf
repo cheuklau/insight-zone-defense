@@ -89,7 +89,7 @@ resource "null_resource" "grafana" {
     destination = "/tmp/dashboards.json"
   }
 
-  # Move Prometheus configuration script remotely
+  # Move Grafina remotely
   provisioner "remote-exec" {
     inline = [
       "sudo mv /tmp/datasource-prometheus.yaml /etc/grafana/provisioning/datasources/",
