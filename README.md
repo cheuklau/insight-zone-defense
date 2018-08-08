@@ -29,7 +29,7 @@ This repository contains the required files and write-up for Cheuk Lau's summer 
 
 ## Introduction
 
-The first goal of this project is to develop a DevOps pipeline for an existing data engineering (DE) application. The DevOps pipeline will provision infrastructure as code (IaC) using Terraform and Packer and version control both the DE application and IaC using Git. We will also show the use of auto-scaling and elastic load balancers (ELBs) to handle increased traffic and the use of a multi-pipeline infrastructure to handle a downed availability zone (AZ). Prometheus will be used to monitor traffic and server status during both simulations.
+The first goal of this project is to develop a DevOps pipeline for an existing data engineering (DE) application. The DevOps pipeline will provision infrastructure as code (IaC) using Terraform and Packer and version control both the DE application and IaC using Git. We will also show the use of auto-scaling and elastic load balancers (ELBs) to handle increased traffic and the use of a multi-pipeline infrastructure to handle a downed availability zone (AZ). Prometheus with Grafana will be used to monitor traffic and server status during both simulations.
 
 ## Data Engineering Application
 
@@ -79,7 +79,7 @@ In the previous section, we developed a baseline DevOps pipeline using immutable
 
 ![Fig 4: Multi-cloud for AirAware using one spark cluster](/images/AirAware_VPC_Multi.png)
 
-The above infrastructure creates two pipelines in the same region across two availability zones. A Spark cluster is only placed in one of the pipelines, and the output is passed into the other using VPC peering sharing. This reduces the cost of haivng to spin up multiple Spark clusters, and is acceptable since batch processing only occurs periodically, and therefore we are only concerned with the customer having access to the front-end and databases containing post-processed data. We also place an elastic load balancer (ELB) to redirect traffic across the two pipelines, and auto-scale the front-end application (Flask instances) according to the fluctuation in user demand.
+The above infrastructure creates two pipelines in the same region across two availability zones. A Spark cluster is only placed in one of the pipelines. This reduces the cost of having to spin up multiple Spark clusters, and is acceptable since batch processing only occurs periodically, and therefore we are only concerned with the customer having access to the front-end and databases containing post-processed data. We also place an elastic load balancer (ELB) to redirect traffic across the two pipelines, and auto-scale the front-end application (Flask instances) according to the fluctuation in user demand.
 
 ### Scenario - Increase Users
 

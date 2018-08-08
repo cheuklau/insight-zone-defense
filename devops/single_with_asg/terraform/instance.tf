@@ -93,8 +93,8 @@ resource "null_resource" "grafana" {
   provisioner "remote-exec" {
     inline = [
       "sudo mv /tmp/datasource-prometheus.yaml /etc/grafana/provisioning/datasources/",
-      "sudo mkdir /etc/grafana/provisioning/dashboards",
       "sudo mv /tmp/dashboards.yaml /etc/grafana/provisioning/dashboards/",
+      "sudo mkdir /var/lib/grafana/dashboards",
       "sudo mv /tmp/dashboards.json /var/lib/grafana/dashboards/",
       "sudo systemctl restart grafana-server.service",
     ]
@@ -392,58 +392,3 @@ resource "null_resource" "spark-controller" {
     ]
   }
 }
-
-##############################################
-# Flask
-##############################################
-
-# resource "aws_instance" "flask" {
-#   ami = "${lookup(var.AMIS, "flask")}"
-#   instance_type = "m4.large"
-#   key_name = "${aws_key_pair.mykeypair.key_name}"
-#   count = 1
-#   vpc_security_group_ids = ["${aws_security_group.open-security-group.id}"]
-#   subnet_id = "${aws_subnet.main-public.id}"
-#   associate_public_ip_address = true
-#   tags {
-#     Name = "flask"
-#     Environment = "dev"
-#     Terraform = "true"
-#   }
-# }
-
-# resource "null_resource" "flask" {
-
-#   # Establish connection to worker
-#   connection {
-#     type = "ssh"
-#     user = "ubuntu"  
-#     host = "${aws_instance.flask.public_ip}"
-#     private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
-#   }
-
-#   # We need postgres spun up first
-#   depends_on = [ "aws_instance.postgres" ]
-
-#   # Provision the Flask setup script
-#   provisioner "file" {
-#     source = "scripts/start-flask.sh"
-#     destination = "/tmp/start-flask.sh"
-#   }
-
-#   # Provision the Prometheus node exporter script
-#   provisioner "file" {
-#     source = "scripts/prometheus_node_exporter_setup.sh"
-#     destination = "/tmp/prometheus_node_exporter_setup.sh"
-#   }
-
-#   # Execute Flask configuration commands remotely
-#   provisioner "remote-exec" {
-#     inline = [
-#       "chmod +x /tmp/start-flask.sh",
-#       "bash /tmp/start-flask.sh '${aws_instance.postgres.private_dns}' '${aws_instance.spark-master.private_dns}'",
-#       "chmod +x /tmp/prometheus_node_exporter_setup.sh",
-#       "bash /tmp/prometheus_node_exporter_setup.sh",
-#     ]
-#   }
-# }

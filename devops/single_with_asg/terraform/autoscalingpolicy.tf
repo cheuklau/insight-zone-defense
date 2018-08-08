@@ -1,12 +1,12 @@
 # Scale up policy
-# Scale up by 1 instance for each scaling activity and wait 10 seconds
+# Scale up by 1 instance for each scaling activity and wait 30 seconds
 # before the next one can start.
 resource "aws_autoscaling_policy" "flask-cpu-policy" {
   name                   = "flask-cpu-policy"
   autoscaling_group_name = "${aws_autoscaling_group.flask-autoscaling.name}"
   adjustment_type        = "ChangeInCapacity"
   scaling_adjustment     = "1"
-  cooldown               = "10"
+  cooldown               = "30"
   policy_type            = "SimpleScaling"
 }
 

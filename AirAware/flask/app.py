@@ -166,7 +166,8 @@ def dashboard():
                         )
 
                     # This actually causes an infinite loop if you don't have both ozone and pm data
-                    return rendered_webpage
+                    # return rendered_webpage
+                    return redirect("https://github.com/agaiduk/AirAware")
 
                 ozone_current = ozone_data[-1][1]
                 pm_current = pm_data[-1][1]

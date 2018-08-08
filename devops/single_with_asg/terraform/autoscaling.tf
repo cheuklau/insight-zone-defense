@@ -23,7 +23,7 @@ resource "aws_autoscaling_group" "flask-autoscaling" {
   launch_configuration = "${aws_launch_configuration.flask-launchconfig.name}"
   min_size             = 1
   max_size             = 3
-  health_check_grace_period = 60
+  health_check_grace_period = 300
   health_check_type = "ELB"
   load_balancers = ["${aws_elb.flask-elb.name}"]
   force_delete = true
