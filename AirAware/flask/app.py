@@ -184,9 +184,14 @@ def dashboard():
 
     if request.method == 'GET':
         # Default coordinates in San Francisco downtown
-        rendered_webpage = request_from_location(sf['lat'], sf['lon'])
-        return rendered_webpage
+        #rendered_webpage = request_from_location(sf['lat'], sf['lon'])
+        #return rendered_webpage
 
+        # It turns out that this causes a huge bottleneck in postgres when 
+        # stress testing so the default will just be an empty graph!
+        return render_template(
+            'dashboard_initial.html'
+        )
     elif request.method == 'POST':
 
         # Get address entered by the user

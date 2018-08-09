@@ -1,16 +1,14 @@
 #!/bin/bash
 
-# Note: First source the virtual Python env
-#       source env/bin/activate
+# Notes: 
+# 1) First source the virtual Python env `source env/bin/activate`
+# 2) Perform the following if not yet performed in virtual env:
+#    - `pip install locustio`
+#    - `pip install -U --force-reinstall --no-binary :all: gevent`
+# 
 
 # Read in ELB URL
 ELB=$1
-
-# Install locustio
-pip install locustio
-
-# Fix gevent compatibility issue
-pip install -U --force-reinstall --no-binary :all: gevent
 
 # Start locust given ELB URL
 locust --host=http://${ELB}
