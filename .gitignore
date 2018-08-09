@@ -5,3 +5,5 @@ misc_notes.md
 *mykeypair.pub
 .DS_Store
 *.terraform/
+devops/single_with_asg/demo-1/__pycache__/
+devops/single_with_asg/demo-1/env/

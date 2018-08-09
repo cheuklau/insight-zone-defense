@@ -6,7 +6,7 @@ resource "aws_autoscaling_policy" "flask-cpu-policy" {
   autoscaling_group_name = "${aws_autoscaling_group.flask-autoscaling.name}"
   adjustment_type        = "ChangeInCapacity"
   scaling_adjustment     = "1"
-  cooldown               = "30"
+  cooldown               = "5"
   policy_type            = "SimpleScaling"
 }
 
@@ -19,9 +19,9 @@ resource "aws_cloudwatch_metric_alarm" "flask-cpu-alarm" {
   evaluation_periods  = "1"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = "60"
+  period              = "1"
   statistic           = "Average"
-  threshold           = "30"
+  threshold           = "40"
 
   dimensions = {
     "AutoScalingGroupName" = "${aws_autoscaling_group.flask-autoscaling.name}"
@@ -39,7 +39,7 @@ resource "aws_autoscaling_policy" "flask-cpu-policy-scaledown" {
   autoscaling_group_name = "${aws_autoscaling_group.flask-autoscaling.name}"
   adjustment_type        = "ChangeInCapacity"
   scaling_adjustment     = "-1"
-  cooldown               = "10"
+  cooldown               = "5"
   policy_type            = "SimpleScaling"
 }
 
@@ -52,7 +52,7 @@ resource "aws_cloudwatch_metric_alarm" "flask-cpu-alarm-scaledown" {
   evaluation_periods  = "1"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = "60"
+  period              = "1"
   statistic           = "Average"
   threshold           = "5"
 
