@@ -23,13 +23,13 @@ variable "AMIS" {
   default = {
     spark = "ami-02108ce2dedbd8a09"
     postgres = "ami-069e44284c50b1da1"
-    flask = "ami-0b922fd837e1971a2"
+    flask = "ami-0a8af4e535b37b49d"
     ubuntu = "ami-ba602bc2"
   }
 }
 
 # Overwritten by build.sh
-variable "NUM_WORKERS" { default = 3 }
+variable "NUM_WORKERS" { default = 5 }
 
 # Overwritten by build.sh
 variable "PATH_TO_PUBLIC_KEY" { default = "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single_with_asg/terraform/mykeypair.pub" }

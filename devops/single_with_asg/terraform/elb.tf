@@ -8,7 +8,7 @@ resource "aws_elb" "flask-elb" {
   subnets = ["${aws_subnet.main-public.id}"]
   security_groups = ["${aws_security_group.open-security-group.id}"]
  listener {
-    instance_port = 8080
+    instance_port = 5000
     instance_protocol = "http"
     lb_port = 80
     lb_protocol = "http"
@@ -17,8 +17,8 @@ resource "aws_elb" "flask-elb" {
     healthy_threshold = 2
     unhealthy_threshold = 2
     timeout = 3
-    target = "HTTP:8080/"
-    interval = 30
+    target = "HTTP:5000/"
+    interval = 300
   }
 
   cross_zone_load_balancing = true

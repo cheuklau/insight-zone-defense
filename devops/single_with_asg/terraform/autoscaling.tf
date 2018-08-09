@@ -10,7 +10,7 @@ resource "aws_launch_configuration" "flask-launchconfig" {
             sed -i '/dns-postgres/c\dns = ${aws_instance.postgres.private_dns}' $${APPHOME}/setup.cfg
             sed -i '/dns-spark/c\dns = ${aws_instance.spark-master.private_dns}:7077' $${APPHOME}/setup.cfg
             cd $${APPHOME}/flask
-            sudo gunicorn app:app --bind=0.0.0.0:8080 --daemon
+            python app.py &
             EOF
   lifecycle {
     create_before_destroy = true
@@ -23,7 +23,7 @@ resource "aws_autoscaling_group" "flask-autoscaling" {
   launch_configuration = "${aws_launch_configuration.flask-launchconfig.name}"
   min_size             = 1
   max_size             = 5
-  health_check_grace_period = 300
+  health_check_grace_period = 600
   health_check_type = "ELB"
   load_balancers = ["${aws_elb.flask-elb.name}"]
   force_delete = true

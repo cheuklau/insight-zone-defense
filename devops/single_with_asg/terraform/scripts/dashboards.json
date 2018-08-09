@@ -23,8 +23,8 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Flask CPU Usage",
-      "description": "CPU usage as a function of time for Flask EC2 instances.",
+      "datasource": "Prometheus",
+      "description": "Data from Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 9,

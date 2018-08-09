@@ -26,9 +26,6 @@ sudo pip install flask_sqlalchemy
 sudo pip install configparser
 sudo pip install psycopg2
 
-# Install gunicorn
-sudo pip install gunicorn
-
 # Install Git and clone repository
 sudo apt-get install git-core
 git clone https://github.com/cheuklau/insight_devops_airaware.git
