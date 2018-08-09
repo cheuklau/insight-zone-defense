@@ -32,6 +32,8 @@ class Config(object):
     SECRET_KEY = secret_key
     SQLALCHEMY_DATABASE_URI = postgres_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_POOL_SIZE = 0
+    SQLALCHEMY_MAX_OVERFLOW = -1
     GOOGLEMAPSKEY = GoogleMapsKey
     GOOGLEMAPSJSKEY = GoogleMapsJSKey
 #    CASSANDRA_NODES = CassandraNode

@@ -33,21 +33,6 @@ sf['lon'] = -87.6297982
 
 import models
 
-def get_pollutant_records(session, data, grid_id, parameter):
-    '''
-    Add full historical pollution data for pollutant code (parameter)
-    at grid_id to a dictionary data
-    '''
-    cql = "SELECT * FROM air.measurements_hourly WHERE grid_id = {} AND parameter = {}"
-    cql_command = cql.format(grid_id, parameter)
-    records = list(session.execute(cql_command))
-
-    for record in records:
-        time = record.time.strftime('%Y-%m-%d %H:%M')
-        if not data.get(time):
-            data[time] = dict()
-        data[time][parameter] = record.c
-
 def get_ozone_and_pm(record):
     '''
     Given record containing pollution data, return streamlined record
