@@ -33,6 +33,12 @@ sf['lon'] = -87.6297982
 
 import models
 
+# Fibonacci sequence to stress test
+def fibonacci(n):
+    if n == 0: return 0
+    elif n == 1: return 1
+    else: return F(n-1)+F(n-1)
+
 def get_ozone_and_pm(record):
     '''
     Given record containing pollution data, return streamlined record
@@ -183,9 +189,10 @@ def dashboard():
         )
 
     if request.method == 'GET':
-        # Default coordinates in San Francisco downtown
-        #rendered_webpage = request_from_location(sf['lat'], sf['lon'])
-        #return rendered_webpage
+
+        # Calculate short Fib sequence to stress test
+        tmp = fibonacci(30)
+
         return render_template(
             'dashboard_initial.html'
         )

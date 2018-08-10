@@ -7,3 +7,5 @@ misc_notes.md
 *.terraform/
 devops/single_with_asg/demo-1/__pycache__/
 devops/single_with_asg/demo-1/env/
+*__pycache__/
+*env/

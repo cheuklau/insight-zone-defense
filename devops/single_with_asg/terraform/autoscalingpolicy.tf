@@ -4,7 +4,7 @@ resource "aws_autoscaling_policy" "flask-cpu-policy" {
   autoscaling_group_name = "${aws_autoscaling_group.flask-autoscaling.name}"
   adjustment_type        = "ChangeInCapacity"
   scaling_adjustment     = "1" # Increment by one each time
-  cooldown               = "5" # Seconds after scaling before next one can start
+  cooldown               = "300" # Seconds after scaling before next one can start
   policy_type            = "SimpleScaling"
 }
 
@@ -13,7 +13,7 @@ resource "aws_cloudwatch_metric_alarm" "flask-cpu-alarm" {
   alarm_name          = "flask-cpu-alarm"
   alarm_description   = "flask-cpu-alarm"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "1" # Number of periods over which data is comapred to threshold
+  evaluation_periods  = "1" # Number of periods over which data is compared to threshold
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
   period              = "60" # Period in seconds over which statistic is applied

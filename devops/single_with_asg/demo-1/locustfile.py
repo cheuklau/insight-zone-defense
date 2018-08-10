@@ -9,6 +9,8 @@
 # Click "Start swarming"
 
 from locust import HttpLocust, TaskSet
+import resource
+resource.setrlimit(resource.RLIMIT_NOFILE, (10240, 9223372036854775807))
 
 def index(l):
 	l.client.get("/")
