@@ -37,7 +37,7 @@ import models
 def fibonacci(n):
     if n == 0: return 0
     elif n == 1: return 1
-    else: return F(n-1)+F(n-1)
+    else: return fibonacci(n-1)+fibonacci(n-1)
 
 def get_ozone_and_pm(record):
     '''
@@ -191,7 +191,7 @@ def dashboard():
     if request.method == 'GET':
 
         # Calculate short Fib sequence to stress test
-        tmp = fibonacci(30)
+        tmp = fibonacci(10)
 
         return render_template(
             'dashboard_initial.html'
