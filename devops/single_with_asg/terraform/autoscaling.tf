@@ -1,4 +1,7 @@
 # AWS launch configuration
+# Note: app_stress.py runs a Fibonacci sequence in the background to increase CPU util.
+#       I am doing this because I want to use locustio interface for the demo and it 
+#       can only output so many calls to the ELB from my local computer!
 resource "aws_launch_configuration" "flask-launchconfig" {
   name_prefix          = "flask-launchconfig"
   image_id             = "${lookup(var.AMIS, "flask")}"

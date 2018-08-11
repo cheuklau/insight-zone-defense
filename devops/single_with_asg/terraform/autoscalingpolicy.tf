@@ -4,7 +4,7 @@ resource "aws_autoscaling_policy" "flask-cpu-policy" {
   autoscaling_group_name = "${aws_autoscaling_group.flask-autoscaling.name}"
   adjustment_type        = "ChangeInCapacity"
   scaling_adjustment     = "1" # Increment by one each time
-  cooldown               = "300" # Seconds after scaling before next one can start
+  cooldown               = "5" # Seconds after scaling before next one can start
   policy_type            = "SimpleScaling"
 }
 
@@ -18,7 +18,7 @@ resource "aws_cloudwatch_metric_alarm" "flask-cpu-alarm" {
   namespace           = "AWS/EC2"
   period              = "60" # Period in seconds over which statistic is applied
   statistic           = "Average"
-  threshold           = "30" # 30% max CPU utilization
+  threshold           = "5" # 5% max CPU utilization
   dimensions = {
     "AutoScalingGroupName" = "${aws_autoscaling_group.flask-autoscaling.name}"
   }
@@ -46,7 +46,7 @@ resource "aws_cloudwatch_metric_alarm" "flask-cpu-alarm-scaledown" {
   namespace           = "AWS/EC2"
   period              = "60"
   statistic           = "Average"
-  threshold           = "5" # Set minimum to 5% utilization
+  threshold           = "1" # Set minimum to 1% utilization
   dimensions = {
     "AutoScalingGroupName" = "${aws_autoscaling_group.flask-autoscaling.name}"
   }

@@ -6,10 +6,6 @@ import configparser
 config = configparser.ConfigParser()
 config.read('../setup.cfg')
 
-#postgres_url = 'postgresql://'\
-#               + config["postgres"]["user"] + ':' + config["postgres"]["password"]\
-#               + '@localhost:' + config["postgres"]["port"] + '/' + config["postgres"]["db"]
-
 postgres_url = 'postgresql://'\
                + config["postgres"]["user"] + ':' + config["postgres"]["password"]\
                + '@' + config["postgres"]["dns"] + ':' + config["postgres"]["port"]\

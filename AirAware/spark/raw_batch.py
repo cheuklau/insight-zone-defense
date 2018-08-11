@@ -302,9 +302,11 @@ def main(argv):
     # spark server
     spark_url = 'spark://' + config["spark"]["dns"]
 
-    # postgresql server
-    postgres_url = 'jdbc:postgresql://' + config["postgres"]["dns"] + '/'\
+    # postgresql server on both subnets
+    postgres_url_1 = 'jdbc:postgresql://' + config["postgres"]["dns-1"] + '/'\
                    + config["postgres"]["db"] + '?ssl=require'
+    postgres_url_2 = 'jdbc:postgresql://' + config["postgres"]["dns-2"] + '/'\
+                   + config["postgres"]["db"] + '?ssl=require'                   
     postgres_credentials = {
         'user': config["postgres"]["user"],
         'password': config["postgres"]["password"]
@@ -381,12 +383,16 @@ def main(argv):
         .persist(StorageLevel.MEMORY_AND_DISK)
 
     ###################################################
-    # Write monthly data to Postgres database
+    # Write monthly data to Postgres database in both subnets
     ###################################################
 
     data_monthly_df = spark.createDataFrame(data_monthly, schema_monthly)
     data_monthly_df.write.jdbc(
-        url=postgres_url, table=table_monthly,
+        url=postgres_url_1, table=table_monthly,
+        mode='append', properties=postgres_credentials
+    )
+        data_monthly_df.write.jdbc(
+        url=postgres_url_2, table=table_monthly,
         mode='append', properties=postgres_credentials
     )
 
