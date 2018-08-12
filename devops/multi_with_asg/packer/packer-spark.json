@@ -5,7 +5,7 @@
     "aws_region": "us-west-2",
     "aws_ami_image": "ami-5189a661",
     "aws_instance_type": "m4.large",
-    "image_version" : "4.0"
+    "image_version" : "5.0"
   },
   "builders": [{
     "type": "amazon-ebs",
@@ -15,10 +15,10 @@
     "source_ami": "{{user `aws_ami_image`}}",
     "instance_type": "{{user `aws_instance_type`}}",
     "ssh_username": "ubuntu",
-    "ami_name" : "insight-packer-spark-4.0"
+    "ami_name" : "insight-packer-spark-5.0"
   }],
   "provisioners": [{
     "type": "shell",
-    "scripts": [ "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single_with_asg/packer/scripts/download-and-install-spark.sh" ]
+    "scripts": [ "/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/multi_with_asg/packer/scripts/download-and-install-spark.sh" ]
   }]
 }

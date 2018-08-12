@@ -14,8 +14,8 @@ resource "aws_launch_configuration" "flask-launchconfig-1" {
             APPHOME='/home/ubuntu/insight_devops_airaware/AirAware'
             sed -i '/dns-postgres-1/c\dns_1 = ${aws_instance.postgres-1.private_dns}' $${APPHOME}/setup.cfg
             sed -i '/dns-postgres-2/c\dns_2 = ${aws_instance.postgres-2.private_dns}' $${APPHOME}/setup.cfg
-            sed -i '/dns-spark/c\dns = ${aws_instance.spark-master-1.private_dns}:7077' $${APPHOME}/setup.cfg
-            sed -i 's/dns/dns-1/g' $${APPHOME}/flask/config.py
+            sed -i '/dns-spark/c\dns = ${aws_instance.spark-master.private_dns}:7077' $${APPHOME}/setup.cfg
+            sed -i 's/dns/dns_1/g' $${APPHOME}/flask/config.py
             cd $${APPHOME}/flask
             python app_stress.py &
             EOF
@@ -58,8 +58,8 @@ resource "aws_launch_configuration" "flask-launchconfig-2" {
             APPHOME='/home/ubuntu/insight_devops_airaware/AirAware'
             sed -i '/dns-postgres-1/c\dns_1 = ${aws_instance.postgres-1.private_dns}' $${APPHOME}/setup.cfg
             sed -i '/dns-postgres-2/c\dns_2 = ${aws_instance.postgres-2.private_dns}' $${APPHOME}/setup.cfg
-            sed -i '/dns-spark/c\dns = ${aws_instance.spark-master-1.private_dns}:7077' $${APPHOME}/setup.cfg
-            sed -i 's/dns/dns-2/g' $${APPHOME}/flask/config.py
+            sed -i '/dns-spark/c\dns = ${aws_instance.spark-master.private_dns}:7077' $${APPHOME}/setup.cfg
+            sed -i 's/dns/dns_2/g' $${APPHOME}/flask/config.py
             cd $${APPHOME}/flask
             python app_stress.py &
             EOF

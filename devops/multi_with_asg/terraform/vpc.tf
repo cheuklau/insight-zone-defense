@@ -11,7 +11,7 @@ This file sets up the virtual private cloud.
 ##############################################
 
 resource "aws_vpc" "main" {
-    cidr_block = "10.0.0.0/24"     # CIDR block for the VPC (required)
+    cidr_block = "10.0.0.0/16"     # CIDR block for the VPC (required)
     instance_tenancy = "default"   # Instance runs on shared hardware
     enable_dns_support = "true"    # Amazon-provided DNS server enabled (default=true)
     enable_dns_hostnames = "true"  # Amazon-provided DNS hostnames enabled (default=false)
@@ -28,7 +28,7 @@ resource "aws_vpc" "main" {
 # Public subnet 1
 resource "aws_subnet" "main-public-1" {
     vpc_id = "${aws_vpc.main.id}"     # Main VPC ID previously defined
-    cidr_block = "10.0.0.0/26"        # CIDR block for this subnet
+    cidr_block = "10.0.1.0/24"        # CIDR block for this subnet
     map_public_ip_on_launch = "true"  # Set to true for public subnets
     availability_zone = "us-west-2a"  # Availability zone
     tags {
@@ -39,7 +39,7 @@ resource "aws_subnet" "main-public-1" {
 # Public subnet 2
 resource "aws_subnet" "main-public-2" {
     vpc_id = "${aws_vpc.main.id}"     # Main VPC ID previously defined
-    cidr_block = "10.0.0.0/26"        # CIDR block for this subnet
+    cidr_block = "10.0.2.0/24"        # CIDR block for this subnet
     map_public_ip_on_launch = "true"  # Set to true for public subnets
     availability_zone = "us-west-2b"  # Availability zone
     tags {

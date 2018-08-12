@@ -303,9 +303,9 @@ def main(argv):
     spark_url = 'spark://' + config["spark"]["dns"]
 
     # postgresql server on both subnets
-    postgres_url_1 = 'jdbc:postgresql://' + config["postgres"]["dns-1"] + '/'\
+    postgres_url_1 = 'jdbc:postgresql://' + config["postgres"]["dns_1"] + '/'\
                    + config["postgres"]["db"] + '?ssl=require'
-    postgres_url_2 = 'jdbc:postgresql://' + config["postgres"]["dns-2"] + '/'\
+    postgres_url_2 = 'jdbc:postgresql://' + config["postgres"]["dns_2"] + '/'\
                    + config["postgres"]["db"] + '?ssl=require'                   
     postgres_credentials = {
         'user': config["postgres"]["user"],
@@ -391,7 +391,7 @@ def main(argv):
         url=postgres_url_1, table=table_monthly,
         mode='append', properties=postgres_credentials
     )
-        data_monthly_df.write.jdbc(
+    data_monthly_df.write.jdbc(
         url=postgres_url_2, table=table_monthly,
         mode='append', properties=postgres_credentials
     )

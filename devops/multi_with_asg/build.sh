@@ -11,8 +11,8 @@
 NSPARK=6
 
 # Path to public and private keys
-PUBLICKEY='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single_with_asg/terraform/mykeypair.pub'
-PRIVATEKEY='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single_with_asg/terraform/mykeypair'
+PUBLICKEY='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/multi_with_asg/terraform/mykeypair.pub'
+PRIVATEKEY='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/multi_with_asg/terraform/mykeypair'
 
 # Region
 REGION='us-west-2'
@@ -21,8 +21,8 @@ REGION='us-west-2'
 PACKERV='5.0'
 
 # Directories
-PACKERHOME='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single_with_asg/packer'
-TERRAFORMHOME='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/single_with_asg/terraform'
+PACKERHOME='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/multi_with_asg/packer'
+TERRAFORMHOME='/Users/cheuklau/Documents/GitHub/insight_devops_airaware/devops/multi_with_asg/terraform'
 
 ####################################################################
 
@@ -40,10 +40,10 @@ gsed -i "/scripts/c\ \ \ \ \"scripts\": \[ \"${PACKERHOME}/scripts/download-and-
 gsed -i "/scripts/c\ \ \ \ \"scripts\": \[ \"${PACKERHOME}/scripts/download-and-install-flask.sh\" \]" ${PACKERHOME}/packer-flask.json
 
 # Create AMIs for Spark, Postgresql and Flask
-packer build -machine-readable ${PACKERHOME}/packer-spark.json | tee ${PACKERHOME}/packer-spark.log
-packer build -machine-readable ${PACKERHOME}/packer-postgresql.json | tee ${PACKERHOME}/packer-postgresql.log
+# packer build -machine-readable ${PACKERHOME}/packer-spark.json | tee ${PACKERHOME}/packer-spark.log
+# packer build -machine-readable ${PACKERHOME}/packer-postgresql.json | tee ${PACKERHOME}/packer-postgresql.log
 packer build -machine-readable ${PACKERHOME}/packer-flask.json | tee ${PACKERHOME}/packer-flask.log
-mv ${PACKERHOME}/*.log ${PACKERHOME}/logs
+# mv ${PACKERHOME}/*.log ${PACKERHOME}/logs
 
 # echo 'Updating Terraform options...'
 
