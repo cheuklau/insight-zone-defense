@@ -23,7 +23,7 @@ variable "AMIS" {
   default = {
     spark = "ami-09550b84dfba8f5cf"
     postgres = "ami-0ac32ff18b7e18d36"
-    flask = "ami-0a48b682d7342a489"
+    flask = "ami-073264bd0fc497f34"
     ubuntu = "ami-ba602bc2"
   }
 }
