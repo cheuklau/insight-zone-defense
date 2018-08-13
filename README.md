@@ -15,9 +15,9 @@ This repository contains the required files and write-up for Cheuk Lau's summer 
     * Terraform
     * Packer
     * Prometheus
-4. [Advanced DevOps: Auto-Scaled Multi-Pipeline Infrastructure](README.md#advanced-devops)
-	* Simulation - Traffic Spike
-	* Simulation - Availability Zone Outage
+4. [Advanced DevOps](README.md#advanced-devops)
+	* Demo - Traffic Spike
+	* Demo - Availability Zone Outage
 5. [Build Instructions](README.md#build-instructions)
 	* Prerequisites
     * Download Data into S3
@@ -73,7 +73,7 @@ The figure above shows two subnets: public and private. Flask uses the public su
 
 Packer is used to create the Amazon machine images (AMI) for each of the components (i.e., Flask, Spark and PostgreSQL) of the data engineering pipeline. The AMIs use a base Ubuntu image and installs the required software.
 
-## Advanced DevOps: Auto-Scaled Multi-Pipeline Infrastructure
+## Advanced DevOps
 
 In this section, we explore the use of an auto-scaled multi-pipeline infrastructure across multiple availability zones. The following figure illustrates the proposed infrastructure for this project:
 
@@ -81,7 +81,7 @@ In this section, we explore the use of an auto-scaled multi-pipeline infrastruct
 
 The above infrastructure creates separate pipelines across two availability zones. A Spark cluster is only placed in one of the pipelines. This reduces the cost of having to spin up multiple Spark clusters, and is acceptable since batch processing only occurs periodically, and therefore we are only concerned with the customer having access to the front-end and databases containing post-processed data. We also place an elastic load balancer (ELB) to redirect traffic across the two availability zones, and auto-scale the front-end application (Flask servers) according to the fluctuation in user demand.
 
-### Scenario - Traffic Spike
+### Demo - Traffic Spike
 
 We use LocustIO to simulate 1000 users pinging our elastic load balancer (ELB) at a rate of 3 clicks per second. The figure below plots the CPU usage as a function of time for the two availability zones (us-west-2a and us-west-2b) throughout the simulation.
 
@@ -89,7 +89,7 @@ We use LocustIO to simulate 1000 users pinging our elastic load balancer (ELB) a
 
 The results show the initial spike in CPU usage in both availability zones followed by automatic provisioning of servers to decrease CPU usage across all servers until they are all below the upper threshold. Once LocustIO is turned off, the CPU usage decreases to nearly zero across all servers and they begin to spin down one by one until only a single server remains. We can also see that the ELB fairly evenly distributed work between the availability zone (perhaps slight bias towards us-west-2b in this example) and between the servers within each availability zone (as evident by the nearly overlapping lines). The screencast of this demo can be found here (https://youtu.be/I6_M_wAIVqY).
 
-### Scenario - Availability Zone Outage
+### Demo - Availability Zone Outage
 
 We use LocustIO to again simulate 1000 users pinging our ELB at a rate of 3 clicks per second. We shut off the ELB connection to one of the availability zones (us-west-2b) at approximately the peak CPU usage. The figure below plots the CPU usage as a function of time for the two availability zones throughout the simulation.
 
