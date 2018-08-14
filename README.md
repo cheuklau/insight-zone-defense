@@ -1,6 +1,6 @@
-# Insight DevOps Project
+# Zone Defense
 
-This repository contains the required files and write-up for Cheuk Lau's summer 2018 Insight DevOps project.
+This repository contains the required files and write-up for Cheuk Lau's 2018 Insight DevOps project.
 
 ## Table of Contents
 
@@ -29,7 +29,7 @@ This repository contains the required files and write-up for Cheuk Lau's summer 
 
 ## Introduction
 
-The goal of this project is to automate deployment of an existing application by writing infrastructure as code (IaC) then improving the existing reliability of the infrastructure by auto-scaling user-facing servers and building redundant pipelines across multiple availability zones. The DevOps pipeline will use Terraform and Packer for automatic deployment, and version control both the application and IaC using Git. Prometheus with Grafana will be used to monitor the health and status across all servers. We demonstrate the robustness of our infrastructure by spiking the traffic and simulating an availability zone outage.
+The goal of this project is to automate the deployment of an application onto AWS by writing infrastructure as code (IaC), and building a high-reliability infrastructure by using auto-scaling and building redundant pipelines across multiple availability zones. The DevOps pipeline will use Terraform and Packer for automatic deployment, and Git for version control. Prometheus and Grafana will be used to monitor the health and status across all servers. We demonstrate the robustness of our infrastructure by spiking the traffic and simulating an availability zone outage.
 
 ## Data Engineering Application
 
@@ -152,4 +152,4 @@ We can go to the Prometheus dashboard at `<Prometheus-IP>:9090` or the Grafana d
 
 ## Conclusions
 
-In this project, we have automated the deployment of an existing application onto a highly reliable infrastructure. We used Terraform and Packer to write our infrastructure as code, added auto-scaling to our user-facing servers to handle fluctuations in traffic, and built redundant pipelines across multiple availability zones for increased fault tolerance.
+In this project, we have automated the deployment of an application onto AWS using a high-reliability infrastructure. We used Terraform and Packer to automate deployment, added auto-scaling to our user-facing servers to handle changes in traffic, and built redundant pipelines across multiple availability zones for increased fault tolerance.
