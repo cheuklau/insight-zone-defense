@@ -1,3 +1,9 @@
+############################################################################
+#
+# Output variables required for other modules
+#
+############################################################################
+
 output "KEY_NAME" {
   value = "${aws_key_pair.mykeypair.key_name}"
 }

@@ -1,12 +1,10 @@
-/*
-
-vars.tf
-
-Purpose: set user-defined variables
-
-Notes: variables are set by build.sh
-
-*/
+############################################################################
+#
+# Required variables 
+#
+# Note: These variables are changed based on user options in build.sh
+#
+############################################################################
 
 variable "AWS_ACCESS_KEY" {}
 

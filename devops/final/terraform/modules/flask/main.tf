@@ -1,4 +1,8 @@
+############################################################################
+#
 # Autoscaling launch configuration
+#
+############################################################################
 resource "aws_launch_configuration" "flask-launchconfig" {
   name_prefix          = "flask-launchconfig-${var.SUBNET_NUM}"
   image_id             = "${var.AMIS}"
@@ -20,7 +24,13 @@ resource "aws_launch_configuration" "flask-launchconfig" {
   }
 }
 
+############################################################################
+#
 # AWS autoscaling group
+#
+# Future work: Allow user to specify min, max size in build.sh
+#
+############################################################################
 resource "aws_autoscaling_group" "flask-autoscaling" {
   name                 = "flask-autoscaling-${var.SUBNET_NUM}"
   vpc_zone_identifier  = ["${var.SUBNET}"]
@@ -38,7 +48,11 @@ resource "aws_autoscaling_group" "flask-autoscaling" {
   }
 }
 
-# Auto-scaling policy
+############################################################################
+#
+# Auto-scaling policy for scaling up
+#
+############################################################################
 resource "aws_autoscaling_policy" "flask-cpu-policy" {
   name                   = "flask-cpu-policy-${var.SUBNET_NUM}"
   autoscaling_group_name = "${aws_autoscaling_group.flask-autoscaling.name}"
@@ -48,7 +62,13 @@ resource "aws_autoscaling_policy" "flask-cpu-policy" {
   policy_type            = "SimpleScaling"
 }
 
-# AWS cloud watch alarm for upper CPU threshold
+############################################################################
+#
+# AWS cloudwatch alarm for upper CPU threshold
+#
+# Future work: Allow user to specify maximum CPU threshold in build.sh
+#
+############################################################################
 resource "aws_cloudwatch_metric_alarm" "flask-cpu-alarm" {
   alarm_name          = "flask-cpu-alarm-${var.SUBNET_NUM}"
   alarm_description   = "flask-cpu-alarm-${var.SUBNET_NUM}"
@@ -66,7 +86,11 @@ resource "aws_cloudwatch_metric_alarm" "flask-cpu-alarm" {
   alarm_actions   = ["${aws_autoscaling_policy.flask-cpu-policy.arn}"]
 }
 
+############################################################################
+#
 # AWS autoscaling policy for scaling down
+#
+############################################################################
 resource "aws_autoscaling_policy" "flask-cpu-policy-scaledown" {
   name                   = "flask-cpu-policy-scaledown-${var.SUBNET_NUM}"
   autoscaling_group_name = "${aws_autoscaling_group.flask-autoscaling.name}"
@@ -76,7 +100,13 @@ resource "aws_autoscaling_policy" "flask-cpu-policy-scaledown" {
   policy_type            = "SimpleScaling"
 }
 
+############################################################################
+#
 # AWS cloud watch alarm for minimum CPU threshold
+#
+# Future work: Allow user to specify minimum threshold in build.sh
+#
+############################################################################
 resource "aws_cloudwatch_metric_alarm" "flask-cpu-alarm-scaledown" {
   alarm_name          = "flask-cpu-alarm-scaledown-${var.SUBNET_NUM}"
   alarm_description   = "flask-cpu-alarm-scaledown-${var.SUBNET_NUM}"

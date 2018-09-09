@@ -1,4 +1,8 @@
-# Prometheus instance
+############################################################################
+#
+# Prometheus instance (includes Grafana)
+#
+############################################################################
 resource "aws_instance" "prometheus" {
   ami = "${var.AMIS}"
   instance_type = "t2.small"
@@ -14,7 +18,11 @@ resource "aws_instance" "prometheus" {
   } 
 }
 
-# Configure prometheus
+############################################################################
+#
+# Configure Prometheus
+#
+############################################################################
 resource "null_resource" "prometheus" {
 
   # Establish connection to worker
@@ -44,7 +52,11 @@ resource "null_resource" "prometheus" {
   }
 }
 
-# Provision Grafana
+############################################################################
+#
+# Configure Grafana
+#
+############################################################################
 resource "null_resource" "grafana" {
 
   # Establish connection to worker

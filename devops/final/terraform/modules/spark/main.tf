@@ -1,4 +1,8 @@
+############################################################################
+#
 # Spark master node
+#
+############################################################################
 resource "aws_instance" "spark-master" {
   ami = "${var.AMIS}"
   instance_type = "m4.large"
@@ -20,7 +24,11 @@ resource "aws_instance" "spark-master" {
   }
 }
 
+############################################################################
+#
 # Spark workers
+#
+############################################################################
 resource "aws_instance" "spark-worker" {
   ami = "${var.AMIS}"
   instance_type = "m4.large"
@@ -42,7 +50,11 @@ resource "aws_instance" "spark-worker" {
   }
 }
 
+############################################################################
+#
 # Configure workers
+#
+############################################################################
 resource "null_resource" "spark-worker" {
 
   count = "${var.NUM_WORKERS}"
@@ -90,7 +102,11 @@ resource "null_resource" "spark-worker" {
   }
 }
 
+############################################################################
+#
 # Configure master
+#
+############################################################################
 resource "null_resource" "spark-master" {
 
   # Establish connection to master
@@ -197,7 +213,11 @@ resource "null_resource" "spark-master" {
   }
 }
 
-# Controller
+############################################################################
+#
+# Spark controller (used to submit jobs)
+#
+############################################################################
 resource "aws_instance" "spark-controller" {
   ami = "${var.AMIS}"
   instance_type = "m4.large"
@@ -217,7 +237,11 @@ resource "aws_instance" "spark-controller" {
   }
 }
 
+############################################################################
+#
 # Configure controller
+#
+############################################################################
 resource "null_resource" "spark-controller" {
 
   # Establish connection to worker

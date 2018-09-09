@@ -1,5 +1,5 @@
 ########################################################################
-# Set up AWS security groups
+# Set up AWS VPC, subnets, security groups
 ########################################################################
 module "aws" {
 
@@ -15,7 +15,7 @@ module "aws" {
 ########################################################################
 # Set up Prometheus 
 ########################################################################
-# Monitor us-west-2a
+# us-west-2a
 module "prometheus-1" {
 
   source = "./modules/prometheus"
@@ -32,7 +32,7 @@ module "prometheus-1" {
 
 }
 
-# Monitor us-west-2b
+# us-west-2b
 module "prometheus-2" {
 
   source = "./modules/prometheus"
@@ -51,8 +51,11 @@ module "prometheus-2" {
 
 ########################################################################
 # Set up Postgres
+#
+# Future work: Investigate AWS relational database services (RDS)
+#              Easy replication and instance replacement (vertical scaling)
 ########################################################################
-# Postgres in us-west-2a
+# us-west-2a
 module "postgres-1" {
 
   source = "./modules/postgres"
@@ -65,7 +68,7 @@ module "postgres-1" {
 
 }
 
-# Postgres in us-west-2b
+# us-west-2b
 module "postgres-2" {
 
   source = "./modules/postgres"
@@ -80,9 +83,9 @@ module "postgres-2" {
 
 ########################################################################
 # Set up Spark
-########################################################################
-# Spark in us-west-2a
+#
 # Future work: Set up Spark using EMR so we can spin up/down on demand
+########################################################################
 module "spark" {
 
   source = "./modules/spark"
@@ -102,9 +105,8 @@ module "spark" {
 }
 
 ########################################################################
-# Set up Flask auto-scaling group
+# Set up Elastic Load Balancer
 ########################################################################
-# Elastic load balancer
 module "elb" {
 
   source = "./modules/elb"
@@ -115,7 +117,10 @@ module "elb" {
 
 }
 
-# Flask ASG in us-west-2a
+########################################################################
+# Set up Flask Auto-Scaling Group
+########################################################################
+# us-west-2a
 module "flask-1" {
 
   source = "./modules/flask"
@@ -132,7 +137,7 @@ module "flask-1" {
 
 }
 
-# Flask ASG in us-west-2b
+# us-west-2b
 module "flask-2" {
 
   source = "./modules/flask"
