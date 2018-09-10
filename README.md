@@ -130,16 +130,17 @@ Perform the following steps to download the EPA data into AWS S3. First, create 
 
 ### Build Infrastructure using Terraform and Packer
 
-* `cd insight_devops_airaware/devops/single` to build the single pipeline infrastructure or `insight_devops_airaware/devops/multi` to build the multi-pipeline infrastructure.
+* `cd insight_devops_airaware/devops/final`
 * `vi build.sh` and change the user inputs as needed.
-* `./build.sh`
+* `./build.sh --packer y --terraform y`
 
 Running `build.sh` performs the following:
 
 * Calls Packer to build the Spark, Postgres, and Flask AMIs.
 * Calls Terraform to spin up Spark cluster, Spark controller, Postgresl, and Flask instances.
+* Outputs the ELB DNS which accesses the Flask front-end servers.
 
-The AirAware front-end is now visible at `<Flask-IP>:8000` or `<ELB-DNS>` if using the multi-pipeline infrastructure. However, we first must run Spark jobs from the Spark controller in order for any data to be visible.
+The AirAware front-end is now visible at `<ELB-DNS>`. However, we first must run Spark jobs from the Spark controller in order for any data to be visible.
 
 ### Run Spark Jobs
 
@@ -154,7 +155,7 @@ We can monitor the status of the Spark jobs at `<Spark-Master-IP>:8080`.
 
 ### Monitor with Prometheus
 
-We can go to the Prometheus dashboard at `<Prometheus-IP>:9090` or the Grafana dashboard at `<Prometheus-IP>:3000`. Node Exporter is installed and runnin gon the Flask servers and the Prometheus server is continuously scraping them for data. Grafana is reading the data sent to Prometheus and displaying them in more elegant dashboards. A default dashboard has been provided in this repo to display the CPU usage as a function of time across the used availability zones.
+We can go to the Prometheus dashboard at `<Prometheus-IP>:9090` or the Grafana dashboard at `<Prometheus-IP>:3000`. Node Exporter is installed and running on the Flask servers and the Prometheus server is continuously scraping them for data. Grafana is reading the data sent to Prometheus and displaying them in more elegant dashboards. A default dashboard has been provided in this repo to display the CPU usage as a function of time across the used availability zones.
 
 ## Conclusion
 
@@ -164,7 +165,7 @@ In this project, we have automated the deployment of an application onto AWS usi
 
 ### CI/CD with Jenkins
 
-The developer to customer pipeline is summarized below:
+The developer-to-customer pipeline is summarized below:
 1. Developer
 2. Build
 3. Test
@@ -172,69 +173,74 @@ The developer to customer pipeline is summarized below:
 5. Provision and Deploy
 6. Customer
 
-Terraform and Packer handles steps 4 (release) and 5 (provision and deploy). However, we still need a continuous integration/continuous deployment or delivery (CI/CD) tool (e.g., Jenkins) to handle steps 2 (build) and 3 (test), and to trigger Terraform and Packer to perform steps 4 and 5. CI/CD for AirAware using Jenkins is summarized below:
+Terraform and Packer handles steps 4 and 5. However, we still need a continuous integration/continuous deployment or delivery (CI/CD) tool (e.g., Jenkins) to handle steps 2 and 3, and to trigger Terraform and Packer to perform steps 4 and 5. CI/CD for AirAware using Jenkins is summarized below:
 * Developer pushes code into the staging environment.
 * Jenkins detects the change and automatically triggers:
-    + Packer to build the AMI in the staging environment.
-    + Terraform to spin up the AMI in the staging environment.
-* Jenkins checks the build using unit tests e.g., server connectivity.
+    + Packer to build the AMIs in the staging environment.
+    + Terraform to spin up the AMIs in the staging environment.
+* Jenkins tests the build e.g., server connectivity.
 * If build is not green, developers are notified.
-* If green, we can either perform automatic deployment into a production environment (continuous delivery) or wait for manual approval (continuous deployment).
-Below are some more specific work items to incorporate Jenkins for CI/CD:
+* If green, we can either automatically deploy into the production environment (continuous delivery) or wait for manual approval (continuous deployment).
+
+Below are some specific work items to incorporate Jenkins for CI/CD:
 * Create separate staging and production environments that both use the same Terraform modules.
 * Use Terraform to spin up an additional instance to run Jenkins.
-* Create a Jenkinsfile with the following properties:
-    + Routinely monitors for changes to AirAware repository in the staging environment.
-    + Create a build stage which triggers Packer to build new AMIs in the staging environment.
-    + Create a deploy-to-staging stage which triggers Terraform to spin up the new AMIs in the staging environment.
-    + Create a testing stage for the new infrastructure in the staging environment.
-    + Create a deploy-to-production stage which either happens automatically if testing stage passes or waits for manual approval.
+* Create a `Jenkinsfile` as follows:
+    + Monitors for changes to the staging environment in the AirAware repository.
+    + Create a `build stage` which triggers Packer to build new AMIs in the staging environment.
+    + Create a `deploy-to-staging` stage which triggers Terraform to spin up the new AMIs in the staging environment.
+    + Create a `testing` stage to test the new infrastructure in the staging environment.
+    + Create a `deploy-to-production` stage which either automatically deploys to production if `testing` stage passes or waits for manual approval.
 
 ### Configuration Management with Puppet
 
-In this project, we used Packer to build AMIs pre-baked with required software and used Bash scripts through Terraform to configure newly spun-up instances. Using Bash scripts in this manner is undesirable for the following reasons:
-* Requires expert knowledge of scripting language standards and style
-* Increased complication when dealing with mixed operating systems (OS)
+In this project, we used Packer to build AMIs with the required software, and used Bash scripts in Terraform to configure new instances. Using Bash scripts in is undesirable for the following reasons:
+* Requires expert knowledge of scripting language standards and style.
+* Increased complication when dealing with mixed operating systems (OS).
 
-An alternative is to use a configuration management (CM) tool e.g., Puppet, which can achieve the same results without worrying about the underlying OS or Bash commands. Puppet uses a declarative domain specific language (DSL) which allows users to only have to specify the task rather than how to perform the task. The main goal of Puppet is to maintain a defined state configuration. For AirAware, we will use a master-agent setup where agent nodes check in with the master node to see if anything needs to be updated. Communication between master and agent nodes is summarized below:
-* Agent sends the data about its state to puppet master (facts which include hostname, kernel details, IP address, etc)
-* Master compiles a list of configurations to be performed on agent (catalog which includes upgrades, removals, file creation, etc)
-* Agent receives catalog from master and executes its tasks
-* Agent reports back to master after catalog tasks are complete
-Below are some more specific work items to incorporate Puppet for CM:
-* Create a Puppet manifest for Spark, Postgres and Flask configurations
-    + Manifest is a collection of Puppet classes with resources written in Puppet DSL that define the desired state
-* Install Puppet and agent setup in Packer-generated AMIs 
-* Create an additional instance to run Puppet master
-* Provision Puppet manifest on Puppet master
-* Install Puppet on master node, and start the Puppet server
-* Use Puppet node definitions to perform manifest classes to appropriate servers e.g., Flask class only to Flask servers etc
+An alternative is to use a configuration management (CM) tool e.g., Puppet, which can achieve the same results without worrying about the underlying OS or Bash commands. Puppet uses a declarative domain specific language (DSL) allowing users to only have to specify the task to be completed. The main goal of Puppet is to maintain a defined state configuration. For AirAware, we will use a `master-agent` setup where `agents` check in with the `master` to see if anything needs to be updated. Communication between `master` and `agents` is summarized below:
+* `Agent` sends data about its state to the `master` (`facts` which include hostname, kernel details, etc).
+* `Master` compiles a list of configurations to be performed on the `agent` (`catalog` which includes upgrades, file creation, etc).
+* `Agent` receives `catalog` from `master` and executes its tasks.
+* `Agent` reports back to `master` after `catalog` tasks are complete.
+
+Below are some specific work items to incorporate Puppet for CM:
+* Create a Puppet `manifest` for Spark, Postgres and Flask configurations.
+    + A `manifest` is a collection of Puppet `classes` with `resources` written in Puppet DSL that define the desired state.
+* Install Puppet on Packer-generated AMIs.
+* Create an additional instance to run the `master`.
+* Provision Puppet `manifest` on the `master`.
+* Install Puppet on `master`, and start the Puppet server.
+* Use Puppet `node definitions` to perform `manifest` tasks onto the appropriate servers.
 
 ### Docker + ECS/EKS Containerization for Flask
 
-In this project, we strictly used virtual machines (VMs) for each component of AirAware. Each VM runs a full copy of an operating system (OS) and virtual copies of all the hardware that the OS needs to run. An alternative to VMs are containers which require just enough of an OS to run a given application. Containers are MBs instead of GBs in size compared to VMs and take seconds rather than minutes to spin up. Flask is a good candidate for containerization as it requires low OS overhead and need to be quickly spun up and down based on user-demand. We can use Docker to containerize Flask. This is done by creating a DockerFile that performs many of the same tasks as Packer to create a Flask Docker image. Docker can be used in conjunction with AWS elastic container service (ECS) or AWS elastic Kubernetes service (EKS) for container orchestration, which defines the relationship between containers, how they auto-scale and how they connect with the internet. Note that ECS and EKS clusters can be built in Terraform using `aws_ecs_cluser` and `aws_eks_cluster` resources respectively. 
+In this project, we strictly used virtual machines (VMs) for each component of AirAware. Each VM runs a full copy of an operating system (OS) and virtual copies of all the hardware that the OS requires. An alternative to VMs are containers which require just enough of an OS to run a given application. Containers are MB instead of GB in size compared to VMs, and take seconds rather than minutes to spin up. Flask is a good candidate for containerization as it requires low OS overhead, and needs to be quickly spun up or down based on user-demand. We can use Docker to containerize Flask. This is done by creating a `DockerFile` that performs many of the same tasks as Packer in order to create a Flask Docker image. Docker can be used in conjunction with AWS elastic container service (ECS) or AWS elastic Kubernetes service (EKS) for container orchestration. A container orchestration tool:
+* Defines the relationship between containers.
+* Sets up container auto-scaling.
+* Defines how containers connect with the internet.
+
+Note that ECS and EKS clusters can be built in Terraform using the `aws_ecs_cluser` and `aws_eks_cluster` resources respectively.
 
 ### AWS RDS for Postgres
 
-Amazon relational database service (RDS) supports Postgres and performs the following tasks:
-* Scale database compute and storage resource with no downtime
-* Perform backups
-* Patches software
-* Multi-availability zone deployments
-* Manages synchronous data replication across availability zones
+Amazon relational database service (RDS) supports Postgres, and performs the following tasks:
+* Scales database storage with little to no downtime.
+* Performs backups.
+* Patches software.
+* Manages synchronous data replication across availability zones.
 
-Note that Terraform can create an `aws_rds_cluster` resource.
+Note that RDS can be built in Terraform using the `aws_rds_cluster` resource.
 
 ### AWS EMR for Spark
 
-Amazon elastic map reduce (EMR) provides a Hadoop framework to run Spark and performs the following tasks:
-* Installs and configures software
-* Provisions nodes
-* Sets up cluster
-* Increase or decrease the number of instances with Autoscaling
-* Use spot instance
+Amazon elastic map reduce (EMR) provides a Hadoop framework to run Spark, and performs the following tasks:
+* Installs and configures all of the required software.
+* Provisions nodes and sets up the cluster.
+* Increases or decreases the number of instances with autoscaling.
+* Uses spot instances.
 
-Note that Terraform can create an `aws_emr_cluster` resource.
+Note that EMR can be built in Terraform using the `aws_emr_cluster` resource.
 
 ### System Design - Scaling Up
 
