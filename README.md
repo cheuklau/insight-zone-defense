@@ -171,6 +171,7 @@ The developer to customer pipeline is summarized below:
 4. Release
 5. Provision and Deploy
 6. Customer
+
 Terraform and Packer handles steps 4 (release) and 5 (provision and deploy). However, we still need a continuous integration/continuous deployment or delivery (CI/CD) tool (e.g., Jenkins) to handle steps 2 (build) and 3 (test), and to trigger Terraform and Packer to perform steps 4 and 5. CI/CD for AirAware using Jenkins is summarized below:
 * Developer pushes code into the staging environment.
 * Jenkins detects the change and automatically triggers:
@@ -194,6 +195,7 @@ Below are some more specific work items to incorporate Jenkins for CI/CD:
 In this project, we used Packer to build AMIs pre-baked with required software and used Bash scripts through Terraform to configure newly spun-up instances. Using Bash scripts in this manner is undesirable for the following reasons:
 * Requires expert knowledge of scripting language standards and style
 * Increased complication when dealing with mixed operating systems (OS)
+
 An alternative is to use a configuration management (CM) tool e.g., Puppet, which can achieve the same results without worrying about the underlying OS or Bash commands. Puppet uses a declarative domain specific language (DSL) which allows users to only have to specify the task rather than how to perform the task. The main goal of Puppet is to maintain a defined state configuration. For AirAware, we will use a master-agent setup where agent nodes check in with the master node to see if anything needs to be updated. Communication between master and agent nodes is summarized below:
 * Agent sends the data about its state to puppet master (facts which include hostname, kernel details, IP address, etc)
 * Master compiles a list of configurations to be performed on agent (catalog which includes upgrades, removals, file creation, etc)
@@ -220,6 +222,7 @@ Amazon relational database service (RDS) supports Postgres and performs the foll
 * Patches software
 * Multi-availability zone deployments
 * Manages synchronous data replication across availability zones
+
 Note that Terraform can create an `aws_rds_cluster` resource.
 
 ### AWS EMR for Spark
@@ -230,7 +233,9 @@ Amazon elastic map reduce (EMR) provides a Hadoop framework to run Spark and per
 * Sets up cluster
 * Increase or decrease the number of instances with Autoscaling
 * Use spot instance
+
 Note that Terraform can create an `aws_emr_cluster` resource.
 
 ### System Design - Scaling Up
 
+TBD
