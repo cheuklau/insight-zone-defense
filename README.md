@@ -31,7 +31,7 @@ This repository contains the required files and write-up for Cheuk Lau's 2018 In
     * Docker + ECS/EKS Containerization for Flask
     * AWS RDS for Postgres
     * AWS EMR for Spark
-    * System Design - Scaling Up
+    * System Design - Scaling Up 10x
 
 ## Introduction
 
@@ -173,12 +173,12 @@ The developer-to-customer pipeline is summarized below:
 5. Provision and Deploy
 6. Customer
 
-Terraform and Packer handles steps 4 and 5. However, we still need a continuous integration/continuous deployment or delivery (CI/CD) tool (e.g., Jenkins) to handle steps 2 and 3, and to trigger Terraform and Packer to perform steps 4 and 5. CI/CD for AirAware using Jenkins is summarized below:
-* Developer pushes code into the staging environment.
+Terraform and Packer handles steps 4 and 5. However, we still need a CI/CD tool (e.g., Jenkins) to handle steps 2 and 3, and to automatically trigger Terraform and Packer to perform steps 4 and 5. CI/CD for AirAware using Jenkins is summarized below:
+* Developer pushes code into Git repository.
 * Jenkins detects the change and automatically triggers:
     + Packer to build the AMIs in the staging environment.
     + Terraform to spin up the AMIs in the staging environment.
-* Jenkins tests the build e.g., server connectivity.
+* Jenkins performs unit tests as provided by the AirAware developer.
 * If build is not green, developers are notified.
 * If green, we can either automatically deploy into the production environment (continuous delivery) or wait for manual approval (continuous deployment).
 
@@ -186,36 +186,37 @@ Below are some specific work items to incorporate Jenkins for CI/CD:
 * Create separate staging and production environments that both use the same Terraform modules.
 * Use Terraform to spin up an additional instance to run Jenkins.
 * Create a `Jenkinsfile` as follows:
-    + Monitors for changes to the staging environment in the AirAware repository.
-    + Create a `build stage` which triggers Packer to build new AMIs in the staging environment.
+    + Monitors for changes to the AirAware Git repository.
+    + Create a `build` stage which triggers Packer to build new AMIs in the staging environment.
     + Create a `deploy-to-staging` stage which triggers Terraform to spin up the new AMIs in the staging environment.
-    + Create a `testing` stage to test the new infrastructure in the staging environment.
-    + Create a `deploy-to-production` stage which either automatically deploys to production if `testing` stage passes or waits for manual approval.
+    + Create a `testing` stage to perform unit tests on the staging environment.
+    + Create a `deploy-to-production` stage which either automatically deploys to production or waits for manual approval if `testing` stage passes.
 
 ### Configuration Management with Puppet
 
-In this project, we used Packer to build AMIs with the required software, and used Bash scripts in Terraform to configure new instances. Using Bash scripts in is undesirable for the following reasons:
+In this project, we used Packer to build AMIs with the required software to run each component of AirAware, and used Bash scripts to configure new instances using Terraform. Using Bash scripts is undesirable for the following reasons:
 * Requires expert knowledge of scripting language standards and style.
-* Increased complication when dealing with mixed operating systems (OS).
+* Increases complexity when dealing with mixed operating systems (OS).
 
-An alternative is to use a configuration management (CM) tool e.g., Puppet, which can achieve the same results without worrying about the underlying OS or Bash commands. Puppet uses a declarative domain specific language (DSL) allowing users to only have to specify the task to be completed. The main goal of Puppet is to maintain a defined state configuration. For AirAware, we will use a `master-agent` setup where `agents` check in with the `master` to see if anything needs to be updated. Communication between `master` and `agents` is summarized below:
+An alternative is to use a configuration management (CM) tool e.g., Puppet, which can achieve the same results without worrying about the underlying OS or Bash commands. Puppet uses a declarative domain specific language (DSL) allowing users to only have to specify the end goal. The main objective of Puppet is to maintain a defined state configuration. For AirAware, we will use a `master-agent` setup where `agents` check in with the `master` to see if anything needs to be updated. Communication between `master` and `agents` is summarized below:
 * `Agent` sends data about its state to the `master` (`facts` which include hostname, kernel details, etc).
 * `Master` compiles a list of configurations to be performed on the `agent` (`catalog` which includes upgrades, file creation, etc).
-* `Agent` receives `catalog` from `master` and executes its tasks.
+* `Agent` receives `catalog` from `master` and executes the tasks.
 * `Agent` reports back to `master` after `catalog` tasks are complete.
 
 Below are some specific work items to incorporate Puppet for CM:
-* Create a Puppet `manifest` for Spark, Postgres and Flask configurations.
-    + A `manifest` is a collection of Puppet `classes` with `resources` written in Puppet DSL that define the desired state.
+* Create a Puppet `module` for AirAware.
+    + `Module` contains Puppet `manifests` for each AirAware component i.e., Spark, Postgres and Flask.
+        - `Manifests` contain Puppet `scripts` which described the desired state using Puppet DSL.
 * Install Puppet on Packer-generated AMIs.
 * Create an additional instance to run the `master`.
-* Provision Puppet `manifest` on the `master`.
+* Provision `manifest` on the `master`.
 * Install Puppet on `master`, and start the Puppet server.
-* Use Puppet `node definitions` to perform `manifest` tasks onto the appropriate servers.
+* Use Puppet `node definitions` to send `manifest` tasks to the appropriate servers.
 
 ### Docker + ECS/EKS Containerization for Flask
 
-In this project, we strictly used virtual machines (VMs) for each component of AirAware. Each VM runs a full copy of an operating system (OS) and virtual copies of all the hardware that the OS requires. An alternative to VMs are containers which require just enough of an OS to run a given application. Containers are MB instead of GB in size compared to VMs, and take seconds rather than minutes to spin up. Flask is a good candidate for containerization as it requires low OS overhead, and needs to be quickly spun up or down based on user-demand. We can use Docker to containerize Flask. This is done by creating a `DockerFile` that performs many of the same tasks as Packer in order to create a Flask Docker image. Docker can be used in conjunction with AWS elastic container service (ECS) or AWS elastic Kubernetes service (EKS) for container orchestration. A container orchestration tool:
+In this project, we used virtual machines (VMs) for every component of AirAware. Each VM runs a full copy of an operating system (OS) and virtual copies of all the hardware that the OS requires. An alternative to VMs are containers which contain just the application, its despendencies and the libraries and binaries required to run the application. Containers are MB instead of GB in size compared to VMs, and take seconds rather than minutes to spin up. Flask is a good candidate for containerization as it requires low OS overhead, and needs to be quickly spun up or down based on user-demand. We can use Docker to containerize Flask. This is done by creating a `DockerFile` that performs many of the same tasks as Packer in order to create a Flask Docker image. Docker can be used in conjunction with AWS elastic container service (ECS) or AWS elastic Kubernetes service (EKS) for container orchestration. A container orchestration tool:
 * Defines the relationship between containers.
 * Sets up container auto-scaling.
 * Defines how containers connect with the internet.
@@ -242,6 +243,60 @@ Amazon elastic map reduce (EMR) provides a Hadoop framework to run Spark, and pe
 
 Note that EMR can be built in Terraform using the `aws_emr_cluster` resource.
 
-### System Design - Scaling Up
+### System Design - Scaling Up 10x
 
-TBD
+#### Functional Requirements
+
+For this exercise, we will scale up the architecture to handle:
+* 10x increase in the amount of data.
+* Add ability for user to download the full resolution hourly data.
+* Increase in user traffic to require multiple webservers.
+
+#### Non-Functional Requirements
+
+We have the following non-functional requirements:
+* High availability - monthly-averaged and full resolution hourly data should not be lost.
+* Low latency - requests should be performed within a given latency requirement.
+
+#### Back-of-the-Envelope Calculations
+
+Full-resolution hourly data storage after 10 years:
+* Multiplying original storage of 500GB results in 5TB of data.
+* Multiplying original data growth per year of 10GB/year results in 100GB/year.
+* Over 10 years, we expect to accumulate 6TB of data.
+
+Monthly-averaged data storage after 10 years:
+* Monthly-to-hourly ratio = 1/720.
+* Over 10 years, we expact to accumulate 8GB of data.
+
+#### Data Partitioning and Replication
+
+For the monthly-averaged data:
+* Continue to use PostGIS to handle geo-spatial lookups.
+* A modern-day server can easily handle 8GB of data.
+* Increase availability by using a master-slave architecture.
+    * Writes are performed on the master which replicates to the slaves. 
+    * Reads are performed on the slaves.
+
+For the full-resolution hourly data:
+* Assuming 1TB of data per shard, we can shard the full-resolution data across 6 databases.
+* Each database can be NoSQL Cassandra with high replication based on the number of worker nodes.
+
+#### Caching
+
+We can speed up requests to the read API by caching part of the monthly-averaged data into memcache or Redis. Requests to the read API first checks the cache for the location. If the cache is not found, then the read API reads from the PostGIS database, and the PostGIS database sends the data to cache. The cache can be cleaned up routinely by removing the least frequently used locations.
+
+#### Load Balancers
+
+Load balancers should be placed between:
+* Client and the reverse-proxy/webservers.
+* Reverse-proxy/webservers and the read/download APIs.
+* Read APIs and cache.
+* Read APIs and PostGIS.
+* Download APIs and Cassandra.
+
+#### Detailed Design
+
+The detailed design with data partitioning/replication, caching and load balancers is shown in the figure below.
+
+![Fig 7: AirAware Scaled up 10 times](/images/AirAware_Scaled.png)
